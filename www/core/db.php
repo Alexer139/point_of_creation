@@ -57,6 +57,6 @@ function migrate(PDO $db): void
     $count = (int) $db->query("SELECT COUNT(*) FROM users")->fetchColumn();
     if ($count === 0) {
         $db->prepare("INSERT INTO users (username, password, role) VALUES (?, ?, 'admin')")
-           ->execute(['admin', password_hash('admin123', PASSWORD_DEFAULT)]);
+           ->execute(['admin', password_hash('admin456', PASSWORD_DEFAULT)]);
     }
 }

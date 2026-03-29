@@ -273,19 +273,25 @@ body {
     border-color 0.25s;
 }
 .sidebar__header {
-  padding: 1.125rem 1.25rem 0.875rem;
+  padding: 1.25rem 1.25rem 1rem;
   border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
 }
-.sidebar__name {
+.sidebar__clock {
   font-family: "Fraunces", serif;
+  font-size: 2rem;
   font-weight: 700;
-  font-size: 1rem;
   color: var(--text);
+  line-height: 1;
+  letter-spacing: -0.02em;
 }
-.sidebar__sub {
+.sidebar__date {
   font-size: 0.75rem;
   color: var(--text3);
-  margin-top: 0.125rem;
+  margin-top: 0.25rem;
+  font-weight: 500;
 }
 .sidebar__section {
   padding: 0.875rem 1rem;
@@ -2138,4 +2144,247 @@ body {
   box-shadow: 0 3px 14px rgba(245, 158, 11, 0.4);
   transform: translateY(-1px);
   color: #fff;
+}
+
+/* ── Nav user as link ───────────────────────────────────────── */
+a.nav-user {
+  text-decoration: none;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+a.nav-user:hover {
+  background: var(--border);
+  border-color: var(--amber);
+  color: var(--text);
+}
+a.nav-user--active {
+  border-color: var(--amber);
+  color: var(--text);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Settings page
+   ══════════════════════════════════════════════════════════════ */
+.settings-page {
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-center {
+  width: 100%;
+  max-width: 680px;
+  margin: 2rem auto;
+  padding: 0 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+}
+
+/* ── Alert ── */
+.settings-alert {
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.settings-alert--ok {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1.5px solid #bbf7d0;
+}
+.settings-alert--err {
+  background: #fff0f0;
+  color: #be123c;
+  border: 1.5px solid #fecdd3;
+}
+[data-theme="dark"] .settings-alert--ok {
+  background: rgba(132, 169, 140, 0.12);
+  color: #86efac;
+  border-color: rgba(132, 169, 140, 0.3);
+}
+[data-theme="dark"] .settings-alert--err {
+  background: rgba(251, 113, 133, 0.1);
+  color: #fb7185;
+  border-color: rgba(251, 113, 133, 0.25);
+}
+
+/* ── Section card ── */
+.scard {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  transition:
+    background 0.25s,
+    border-color 0.2s;
+}
+.scard--danger {
+  border-color: #fecdd3;
+}
+[data-theme="dark"] .scard--danger {
+  border-color: rgba(251, 113, 133, 0.3);
+}
+
+.scard__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.875rem;
+}
+.scard__icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+.scard__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.scard__sub {
+  font-size: 0.8125rem;
+  color: var(--text3);
+  margin-top: 0.125rem;
+}
+
+/* ── Avatar ── */
+.s-avatar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+}
+.s-avatar__circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--amber2), var(--orange));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3);
+}
+.s-avatar__name {
+  font-weight: 700;
+  color: var(--text);
+  font-size: 1rem;
+}
+.s-avatar__role {
+  font-size: 0.8125rem;
+  color: var(--amber);
+  font-weight: 600;
+  margin-top: 0.1rem;
+}
+.s-avatar__since {
+  font-size: 0.75rem;
+  color: var(--text3);
+  margin-top: 0.1rem;
+}
+
+/* ── Form inside scard ── */
+.scard form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+.scard form .btn {
+  align-self: flex-start;
+}
+.field__hint {
+  font-size: 0.75rem;
+  color: var(--text3);
+  margin-top: 0.35rem;
+}
+
+/* ── Stats ── */
+.s-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+@media (max-width: 500px) {
+  .s-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.s-stat {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  text-align: center;
+}
+.s-stat__val {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--amber);
+  font-family: "Fraunces", serif;
+  line-height: 1;
+}
+.s-stat__lbl {
+  font-size: 0.75rem;
+  color: var(--text3);
+  margin-top: 0.375rem;
+}
+
+/* ── Danger row ── */
+.s-danger-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  border: 1.5px dashed #fecdd3;
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+}
+[data-theme="dark"] .s-danger-row {
+  border-color: rgba(251, 113, 133, 0.25);
+}
+.s-danger-row__title {
+  font-weight: 600;
+  color: var(--text);
+}
+.s-danger-row__sub {
+  font-size: 0.8125rem;
+  color: var(--text3);
+  margin-top: 0.2rem;
+}
+
+/* ── Delete account form (collapsed by default) ── */
+.s-delete-form {
+  display: none;
+  flex-direction: column;
+  gap: 0.875rem;
+  background: var(--bg2);
+  border: 1px solid #fecdd3;
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+[data-theme="dark"] .s-delete-form {
+  border-color: rgba(251, 113, 133, 0.25);
+}
+.s-delete-form--open {
+  display: flex;
 }

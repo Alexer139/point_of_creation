@@ -32,7 +32,7 @@ layout_start('Мой дашборд');
       <span class="logo__text">Point of <em>Creation</em></span>
     </a>
     <div class="nav-spacer"></div>
-    <div class="nav-user">👤 <?= htmlspecialchars($user['username']) ?></div>
+    <a href="/settings.php" class="nav-user" title="Настройки профиля">👤 <?= htmlspecialchars($user['username']) ?></a>
 
     <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Сменить тему">🌙</button>
     <a href="/about.php" class="btn btn--ghost">О проекте</a>
@@ -47,8 +47,8 @@ layout_start('Мой дашборд');
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar__header">
-        <div class="sidebar__name">Point of Creation</div>
-        <div class="sidebar__sub"><?= htmlspecialchars($user['username']) ?></div>
+        <div class="sidebar__clock" id="sidebar-time">00:00</div>
+        <div class="sidebar__date"  id="sidebar-date"></div>
       </div>
 
       <div class="sidebar__section sidebar__section--grow">

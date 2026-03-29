@@ -61,7 +61,6 @@ layout_start('Вход', ['body_class' => 'auth-page']);
     </div>
   </div>
 
-  <p class="auth-card__hint">Тестовый доступ: <span>admin</span> / admin123</p>
 </div>
 
 <?php layout_end(); ?>

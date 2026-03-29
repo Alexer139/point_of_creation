@@ -127,15 +127,48 @@ function applyTheme(theme, save) {
 
 /* ══ Nav clock ══════════════════════════════════════════════ */
 
+const DAYS_RU = [
+  "Воскресенье",
+  "Понедельник",
+  "Вторник",
+  "Среда",
+  "Четверг",
+  "Пятница",
+  "Суббота",
+];
+const MONTHS_SHORT_RU = [
+  "янв",
+  "фев",
+  "мар",
+  "апр",
+  "май",
+  "июн",
+  "июл",
+  "авг",
+  "сен",
+  "окт",
+  "ноя",
+  "дек",
+];
+
 function initClock() {
   tickClock();
-  setInterval(tickClock, 5000);
+  setInterval(tickClock, 1000);
 }
 function tickClock() {
-  const el = document.getElementById("nav-clock");
-  if (!el) return;
   const d = new Date();
-  el.textContent = pad(d.getHours()) + ":" + pad(d.getMinutes());
+  // Sidebar clock
+  const timeEl = document.getElementById("sidebar-time");
+  if (timeEl)
+    timeEl.textContent = pad(d.getHours()) + ":" + pad(d.getMinutes());
+  const dateEl = document.getElementById("sidebar-date");
+  if (dateEl)
+    dateEl.textContent =
+      DAYS_RU[d.getDay()] +
+      ", " +
+      d.getDate() +
+      " " +
+      MONTHS_SHORT_RU[d.getMonth()];
 }
 
 /* ══ API ════════════════════════════════════════════════════ */
