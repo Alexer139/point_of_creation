@@ -1,0 +1,15 @@
+services:
+  app:
+    build: .
+    container_name: personal-os
+    ports:
+      - "8080:80"
+    volumes:
+      # Связываем текущую папку с папкой Apache внутри контейнера
+      - ./www:/var/www/html 
+      # Оставляем ваш том для базы данных
+      - db_data:/data
+    restart: unless-stopped
+
+volumes:
+  db_data:

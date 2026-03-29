@@ -1,0 +1,32 @@
+# --- Секреты (САМОЕ ВАЖНОЕ) ---
+# Никогда не отправляйте пароли от БД и ключи API на GitHub
+.env
+.env.local
+config/secrets.php
+
+# --- Зависимости ---
+# Эти папки весят много, их скачивают командой composer install
+/vendor/
+/node_modules/
+
+# --- Docker ---
+# Если у вас есть локальные переопределения для докера
+docker-compose.override.yml
+
+# --- Временные файлы и Логи ---
+*.log
+/tmp/
+/var/log/
+/var/cache/
+.phpunit.result.cache
+
+# --- Мусор операционных систем ---
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# --- Настройки редакторов (IDE) ---
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
