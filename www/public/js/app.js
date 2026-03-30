@@ -10,17 +10,19 @@
 
 /* ══ Constants ══════════════════════════════════════════════ */
 
-const WIDGET_ICONS = {
-  metric: "🔢",
-  note: "📝",
-  checklist: "✅",
-  goal: "🎯",
-  timer: "⏱",
-  line_chart: "📈",
-  bar_chart: "📊",
-  table: "🗂",
-  calendar: "📅",
+// SVG icon strings for widget headers
+const SVG = {
+  metric:     '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></svg>',
+  note:       '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>',
+  checklist:  '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>',
+  goal:       '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+  timer:      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>',
+  line_chart: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>',
+  bar_chart:  '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>',
+  table:      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>',
+  calendar:   '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>',
 };
+const WIDGET_ICONS = SVG; // alias
 const WIDGET_LABELS = {
   metric: "Числовой показатель",
   note: "Заметка",
@@ -113,8 +115,8 @@ function toggleTheme() {
 
 function applyTheme(theme, save) {
   document.documentElement.setAttribute("data-theme", theme);
-  const btn = document.getElementById("theme-toggle");
-  if (btn) btn.textContent = theme === "dark" ? "☀️" : "🌙";
+  document.querySelectorAll('.icon--theme-moon').forEach(el => { el.style.display = theme==='dark'?'none':'inline-block'; });
+  document.querySelectorAll('.icon--theme-sun').forEach(el => { el.style.display = theme==='dark'?'inline-block':'none'; });
   if (save) localStorage.setItem("poc-theme", theme);
   // Redraw charts for correct grid/tick colors
   widgets
@@ -127,29 +129,8 @@ function applyTheme(theme, save) {
 
 /* ══ Nav clock ══════════════════════════════════════════════ */
 
-const DAYS_RU = [
-  "Воскресенье",
-  "Понедельник",
-  "Вторник",
-  "Среда",
-  "Четверг",
-  "Пятница",
-  "Суббота",
-];
-const MONTHS_SHORT_RU = [
-  "янв",
-  "фев",
-  "мар",
-  "апр",
-  "май",
-  "июн",
-  "июл",
-  "авг",
-  "сен",
-  "окт",
-  "ноя",
-  "дек",
-];
+const DAYS_RU   = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+const MONTHS_SHORT_RU = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
 
 function initClock() {
   tickClock();
@@ -158,17 +139,10 @@ function initClock() {
 function tickClock() {
   const d = new Date();
   // Sidebar clock
-  const timeEl = document.getElementById("sidebar-time");
-  if (timeEl)
-    timeEl.textContent = pad(d.getHours()) + ":" + pad(d.getMinutes());
-  const dateEl = document.getElementById("sidebar-date");
-  if (dateEl)
-    dateEl.textContent =
-      DAYS_RU[d.getDay()] +
-      ", " +
-      d.getDate() +
-      " " +
-      MONTHS_SHORT_RU[d.getMonth()];
+  const timeEl = document.getElementById('sidebar-time');
+  if (timeEl) timeEl.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
+  const dateEl = document.getElementById('sidebar-date');
+  if (dateEl) dateEl.textContent = DAYS_RU[d.getDay()] + ', ' + d.getDate() + ' ' + MONTHS_SHORT_RU[d.getMonth()];
 }
 
 /* ══ API ════════════════════════════════════════════════════ */
@@ -447,7 +421,7 @@ async function confirmAdd() {
     toast("Ошибка: " + e.message, "err");
   } finally {
     btn.disabled = false;
-    btn.textContent = "✦ Добавить";
+    btn.innerHTML = "✦ Добавить";
   }
 }
 
@@ -893,7 +867,7 @@ function toggleTimer(wid) {
     clearInterval(window[key]);
     window[key] = null;
     const btn = document.getElementById("tp-" + wid);
-    if (btn) btn.textContent = "▶ Продолжить";
+    if (btn) btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 3 20 12 6 21 6 3"/></svg> Продолжить';
     document
       .getElementById("td-" + wid)
       ?.classList.remove("timer__display--running");
@@ -902,7 +876,7 @@ function toggleTimer(wid) {
       .getElementById("td-" + wid)
       ?.classList.add("timer__display--running");
     const btn = document.getElementById("tp-" + wid);
-    if (btn) btn.textContent = "⏸ Пауза";
+    if (btn) btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="4" height="16" x="6" y="4"/><rect width="4" height="16" x="14" y="4"/></svg> Пауза';
     const mode = w.content.mode;
     window[key] = setInterval(() => {
       if (mode === "countdown") {
@@ -916,7 +890,7 @@ function toggleTimer(wid) {
               "timer__display--running",
               "timer__display--warning",
             );
-          toast("⏱ Таймер завершён!");
+          toast("Таймер завершён");
         }
       } else {
         w.content.elapsed = (w.content.elapsed || 0) + 1;
@@ -1306,7 +1280,7 @@ async function clearAllWidgets() {
     updateWidgetCount();
     renderEmptyIfNeeded();
   }, 220);
-  toast("🗑 Все виджеты удалены");
+  toast("Все виджеты удалены");
 }
 
 /* ══ Utility ════════════════════════════════════════════════ */
@@ -1325,7 +1299,7 @@ function renderEmptyIfNeeded() {
     div.className = "canvas__empty";
     div.id = "empty-state";
     div.innerHTML =
-      '<div class="canvas__empty-icon">✦</div><h3>Добавьте первый виджет</h3><p>Выберите тип в левой панели и начните строить своё пространство</p>';
+      '<div class="canvas__empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg></div><h3>Добавьте первый виджет</h3><p>Выберите тип в левой панели и начните строить своё пространство</p>';
     grid.prepend(div);
   }
 }

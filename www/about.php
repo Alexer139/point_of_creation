@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/core/auth.php';
+require_once __DIR__ . '/core/icons.php';
 require_once __DIR__ . '/templates/layout.php';
 
 layout_start('О проекте', ['body_class' => 'about-page']);
@@ -8,14 +9,14 @@ layout_start('О проекте', ['body_class' => 'about-page']);
 <!-- Navbar -->
 <nav class="navbar">
   <a href="/" class="logo">
-    <div class="logo__mark">✦</div>
+    <div class="logo__mark"><?= icon('sparkles', '', 16) ?></div>
     <span class="logo__text">Point of <em>Creation</em></span>
   </a>
   <div class="nav-spacer"></div>
-  <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Сменить тему">🌙</button>
+  <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Сменить тему"><?= icon('moon', 'icon--theme-moon', 16) ?><?= icon('sun', 'icon--theme-sun', 16) ?></button>
   <?php if (is_logged_in()): ?>
-    <a href="/" class="btn btn--ghost">← Дашборд</a>
-    <a href="/logout.php" class="btn btn--danger">Выйти</a>
+    <a href="/" class="btn btn--ghost"><?= icon('arrow-left', '', 14) ?> Дашборд</a>
+    <a href="/logout.php" class="btn btn--danger"><?= icon('log-out', '', 14) ?> Выйти</a>
   <?php else: ?>
     <a href="/login.php" class="btn btn--warm">Войти</a>
   <?php endif; ?>
@@ -167,7 +168,7 @@ layout_start('О проекте', ['body_class' => 'about-page']);
   <div class="about-footer__inner">
     <div>
       <div class="about-footer__brand">
-        <div class="about-footer__logo">✦</div>
+        <div class="about-footer__logo"><?= icon('sparkles', '', 16) ?></div>
         <span class="about-footer__name">Point of <em>Creation</em></span>
       </div>
       <div class="about-footer__copy">

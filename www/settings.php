@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/core/auth.php';
+require_once __DIR__ . '/core/icons.php';
 require_once __DIR__ . '/templates/layout.php';
 require_auth();
 
@@ -86,19 +87,19 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
 
 <nav class="navbar">
   <a href="/" class="logo">
-    <div class="logo__mark">✦</div>
+    <div class="logo__mark"><?= icon('sparkles', '', 16) ?></div>
     <span class="logo__text">Point of <em>Creation</em></span>
   </a>
   <div class="nav-spacer"></div>
   <a href="/settings.php" class="nav-user nav-user--active" title="Настройки профиля">
-    👤 <?= htmlspecialchars($user['username']) ?>
+    <?= icon('user', '', 14) ?> <?= htmlspecialchars($user['username']) ?>
   </a>
-  <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Сменить тему">🌙</button>
+  <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Сменить тему"><?= icon('moon', 'icon--theme-moon', 16) ?><?= icon('sun', 'icon--theme-sun', 16) ?></button>
   <a href="/" class="btn btn--ghost">← Дашборд</a>
   <?php if (is_admin()): ?>
-    <a href="/admin.php" class="btn btn--admin">⚙ Admin</a>
+    <a href="/admin.php" class="btn btn--admin"><?= icon('settings', '', 14) ?> Admin</a>
   <?php endif; ?>
-  <a href="/logout.php" class="btn btn--danger">Выйти</a>
+  <a href="/logout.php" class="btn btn--danger"><?= icon('log-out', '', 14) ?> Выйти</a>
 </nav>
 
 <div class="settings-center">
@@ -113,7 +114,7 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
   <!-- Profile -->
   <section class="scard" id="profile">
     <div class="scard__head">
-      <div class="scard__icon">👤</div>
+      <div class="scard__icon"><?= icon('user', '', 20) ?></div>
       <div>
         <div class="scard__title">Профиль</div>
         <div class="scard__sub">Имя пользователя для входа в систему</div>
@@ -123,7 +124,7 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
       <div class="s-avatar__circle"><?= mb_strtoupper(mb_substr($user['username'], 0, 1)) ?></div>
       <div>
         <div class="s-avatar__name"><?= htmlspecialchars($user['username']) ?></div>
-        <div class="s-avatar__role"><?= $user['role'] === 'admin' ? '⭐ Администратор' : '👤 Пользователь' ?></div>
+        <div class="s-avatar__role"><?= $user['role'] === 'admin' ? icon('star','',13).' Администратор' : icon('user','',13).' Пользователь' ?></div>
         <?php if ($urow): ?>
           <div class="s-avatar__since">С нами с <?= date('d.m.Y', strtotime($urow['created_at'])) ?></div>
         <?php endif; ?>
@@ -139,14 +140,14 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
                minlength="3" maxlength="32" required autocomplete="username">
         <div class="field__hint">Только a–z, 0–9 и _. От 3 до 32 символов.</div>
       </div>
-      <button class="btn btn--warm" type="submit">✦ Сохранить имя</button>
+      <button class="btn btn--warm" type="submit"><?= icon('save','',14) ?> Сохранить имя</button>
     </form>
   </section>
 
   <!-- Password -->
   <section class="scard" id="password">
     <div class="scard__head">
-      <div class="scard__icon">🔒</div>
+      <div class="scard__icon"><?= icon('lock', '', 20) ?></div>
       <div>
         <div class="scard__title">Смена пароля</div>
         <div class="scard__sub">Используйте надёжный пароль от 6 символов</div>
@@ -170,14 +171,14 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
         <input class="input" type="password" name="confirm_password" required
                minlength="6" autocomplete="new-password" placeholder="Повторите пароль">
       </div>
-      <button class="btn btn--warm" type="submit">🔒 Изменить пароль</button>
+      <button class="btn btn--warm" type="submit"><?= icon('lock','',14) ?> Изменить пароль</button>
     </form>
   </section>
 
   <!-- Stats -->
   <section class="scard" id="stats">
     <div class="scard__head">
-      <div class="scard__icon">📊</div>
+      <div class="scard__icon"><?= icon('bar-chart-2', '', 20) ?></div>
       <div>
         <div class="scard__title">Статистика аккаунта</div>
         <div class="scard__sub">Общая информация о вашем пространстве</div>
@@ -206,7 +207,7 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
   <!-- Danger zone -->
   <section class="scard scard--danger" id="danger">
     <div class="scard__head">
-      <div class="scard__icon">⚠</div>
+      <div class="scard__icon"><?= icon('alert-triangle', '', 20) ?></div>
       <div>
         <div class="scard__title">Опасная зона</div>
         <div class="scard__sub">Необратимые действия с данными аккаунта</div>
@@ -219,7 +220,7 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
       </div>
       <button class="btn btn--danger" type="button"
               onclick="document.getElementById('delete-account-form').classList.toggle('s-delete-form--open')">
-        🗑 Удалить аккаунт
+        <?= icon('trash','',14) ?> Удалить аккаунт
       </button>
     </div>
 
@@ -233,7 +234,7 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
                required placeholder="Ваш текущий пароль" autocomplete="current-password">
       </div>
       <div style="display:flex;gap:.75rem;flex-wrap:wrap">
-        <button class="btn btn--danger" type="submit">Подтвердить удаление</button>
+        <button class="btn btn--danger" type="submit"><?= icon('trash','',14) ?> Подтвердить удаление</button>
         <button class="btn btn--ghost" type="button"
                 onclick="document.getElementById('delete-account-form').classList.remove('s-delete-form--open')">
           Отмена
@@ -249,7 +250,7 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
   <div class="about-footer__inner">
     <div>
       <div class="about-footer__brand">
-        <div class="about-footer__logo">✦</div>
+        <div class="about-footer__logo"><?= icon('sparkles', '', 16) ?></div>
         <span class="about-footer__name">Point of <em>Creation</em></span>
       </div>
       <div class="about-footer__copy">© 2026 Point of Creation — личное пространство для глубокой работы.</div>
@@ -262,17 +263,19 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
 </footer>
 
 <script>
+function applyThemeIcons(t){
+  document.querySelectorAll('.icon--theme-moon').forEach(function(el){ el.style.display = t==='dark'?'none':'inline-block'; });
+  document.querySelectorAll('.icon--theme-sun').forEach(function(el){ el.style.display = t==='dark'?'inline-block':'none'; });
+}
 (function(){
-  var t = localStorage.getItem('poc-theme') || 'light';
-  var b = document.getElementById('theme-toggle');
-  if (b) b.textContent = t === 'dark' ? '☀️' : '🌙';
+  var t = document.documentElement.getAttribute('data-theme') || 'light';
+  applyThemeIcons(t);
 })();
 function toggleTheme(){
   var t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', t);
   localStorage.setItem('poc-theme', t);
-  var b = document.getElementById('theme-toggle');
-  if (b) b.textContent = t === 'dark' ? '☀️' : '🌙';
+  applyThemeIcons(t);
 }
 </script>
 

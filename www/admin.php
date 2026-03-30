@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/core/auth.php';
+require_once __DIR__ . '/core/icons.php';
 require_once __DIR__ . '/templates/layout.php';
 require_admin();
 
@@ -36,14 +37,14 @@ layout_start('Администратор', ['body_class' => 'admin-page']);
 
 <nav class="navbar">
   <a href="/" class="logo">
-    <div class="logo__mark">✦</div>
+    <div class="logo__mark"><?= icon('sparkles', '', 16) ?></div>
     <span class="logo__text">Point of <em>Creation</em></span>
   </a>
   <span class="btn btn--admin" style="cursor:default">⚙ Панель администратора</span>
   <div class="nav-spacer"></div>
-  <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Сменить тему">🌙</button>
-  <a href="/" class="btn btn--ghost">← Дашборд</a>
-  <a href="/logout.php" class="btn btn--danger">Выйти</a>
+  <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Сменить тему"><?= icon('moon', 'icon--theme-moon', 16) ?><?= icon('sun', 'icon--theme-sun', 16) ?></button>
+  <a href="/" class="btn btn--ghost"><?= icon('arrow-left', '', 14) ?> Дашборд</a>
+  <a href="/logout.php" class="btn btn--danger"><?= icon('log-out', '', 14) ?> Выйти</a>
 </nav>
 
 <div class="admin-content">
