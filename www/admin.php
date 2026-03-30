@@ -40,7 +40,7 @@ layout_start('Администратор', ['body_class' => 'admin-page']);
     <div class="logo__mark"><?= icon('sparkles', '', 16) ?></div>
     <span class="logo__text">Point of <em>Creation</em></span>
   </a>
-  <span class="btn btn--admin" style="cursor:default">⚙ Панель администратора</span>
+  <span class="btn btn--admin" style="cursor:default"><?= icon('settings','',15) ?> Панель администратора</span>
   <div class="nav-spacer"></div>
   <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Сменить тему"><?= icon('moon', 'icon--theme-moon', 16) ?><?= icon('sun', 'icon--theme-sun', 16) ?></button>
   <a href="/" class="btn btn--ghost"><?= icon('arrow-left', '', 14) ?> Дашборд</a>
@@ -60,9 +60,9 @@ layout_start('Администратор', ['body_class' => 'admin-page']);
 
   <div class="admin-stats">
     <?php foreach ([
-      ['👥','Пользователей',$totals['total_users'],'rgba(245,158,11,.12)','var(--amber)'],
-      ['📦','Виджетов',     $totals['total_widgets'],'rgba(251,146,60,.1)','var(--orange)'],
-      ['⚙', 'Админов',     $totals['total_admins'],'rgba(139,92,246,.1)','#8b5cf6'],
+      [icon('user','',20),'Пользователей',$totals['total_users'],'rgba(245,158,11,.12)','var(--amber)'],
+      [icon('layout-grid','',20),'Виджетов',$totals['total_widgets'],'rgba(251,146,60,.1)','var(--orange)'],
+      [icon('star','',20),'Админов',$totals['total_admins'],'rgba(139,92,246,.1)','#8b5cf6'],
     ] as [$icon,$label,$val,$bg,$color]): ?>
       <div class="stat-card">
         <div class="stat-card__icon" style="background:<?= $bg ?>"><?= $icon ?></div>
@@ -95,7 +95,7 @@ layout_start('Администратор', ['body_class' => 'admin-page']);
                 </div>
               </div>
             </td>
-            <td><span class="role-badge role-badge--<?= $u['role'] ?>"><?= $u['role']==='admin'?'⚙ admin':'user' ?></span></td>
+            <td><span class="role-badge role-badge--<?= $u['role'] ?>"><?= $u['role']==='admin'?icon('star','',12).' admin':'user' ?></span></td>
             <td style="font-weight:700;color:var(--amber)"><?= (int)$u['widget_count'] ?></td>
             <td style="color:var(--text2);font-size:.8125rem"><?= date('d.m.Y H:i', strtotime($u['created_at'])) ?></td>
             <td>
@@ -120,7 +120,7 @@ layout_start('Администратор', ['body_class' => 'admin-page']);
 </div>
 
 <script>
-function toggleTheme(){var t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',t);localStorage.setItem('poc-theme',t);var b=document.getElementById('theme-toggle');if(b)b.textContent=t==='dark'?'☀️':'🌙';}
+function toggleTheme(){var t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',t);localStorage.setItem('poc-theme',t);var b=document.getElementById('theme-toggle');document.querySelectorAll('.icon--theme-moon').forEach(function(el){el.style.display=t==='dark'?'none':'inline-block';});document.querySelectorAll('.icon--theme-sun').forEach(function(el){el.style.display=t==='dark'?'inline-block':'none';});}
 </script>
 
 <?php layout_end(); ?>

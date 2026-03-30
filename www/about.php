@@ -24,7 +24,7 @@ layout_start('О проекте', ['body_class' => 'about-page']);
 
 <!-- Hero -->
 <div class="about-hero">
-  <div class="about-hero__eyebrow">✦ Инструмент для 2026</div>
+  <div class="about-hero__eyebrow"><?= icon('sparkles','',14) ?> Инструмент для 2026</div>
   <h1 class="about-hero__title">Point of <em>Creation</em></h1>
   <p class="about-hero__sub">
     Личное пространство для фокуса, продуктивности и осмысленной работы
@@ -37,7 +37,7 @@ layout_start('О проекте', ['body_class' => 'about-page']);
 
   <!-- Mission -->
   <section class="about-section">
-    <div class="about-section__tag">🎯 Миссия</div>
+    <div class="about-section__tag"><?= icon('target','',15) ?> Миссия ?></div>
     <h2 class="about-section__title">Почему это важно именно сейчас</h2>
     <div class="about-section__body">
       <p>
@@ -59,7 +59,7 @@ layout_start('О проекте', ['body_class' => 'about-page']);
 
   <!-- Key Features -->
   <section class="about-section">
-    <div class="about-section__tag">⚡ Ключевые возможности</div>
+    <div class="about-section__tag"><?= icon('zap','',15) ?> Ключевые возможности ?></div>
     <h2 class="about-section__title">Всё что нужно — в одном месте</h2>
     <div class="about-section__body">
       <p>
@@ -70,42 +70,42 @@ layout_start('О проекте', ['body_class' => 'about-page']);
     </div>
     <div class="about-features">
       <div class="about-feature">
-        <div class="about-feature__icon">🔢</div>
+        <div class="about-feature__icon"><?= icon('hash','',22) ?></div>
         <div class="about-feature__title">Числовые показатели</div>
         <div class="about-feature__desc">Отслеживайте любые метрики с трендами и динамикой изменений.</div>
       </div>
       <div class="about-feature">
-        <div class="about-feature__icon">✅</div>
+        <div class="about-feature__icon"><?= icon('list-checks','',22) ?></div>
         <div class="about-feature__title">Списки и задачи</div>
         <div class="about-feature__desc">Чеклисты с прогрессом — никогда не теряйте нить ключевых задач.</div>
       </div>
       <div class="about-feature">
-        <div class="about-feature__icon">🎯</div>
+        <div class="about-feature__icon"><?= icon('target','',22) ?></div>
         <div class="about-feature__title">Цели с прогрессом</div>
         <div class="about-feature__desc">Визуальная полоска прогресса держит вас в фокусе на пути к результату.</div>
       </div>
       <div class="about-feature">
-        <div class="about-feature__icon">⏱</div>
+        <div class="about-feature__icon"><?= icon('timer','',22) ?></div>
         <div class="about-feature__title">Таймер и Помодоро</div>
         <div class="about-feature__desc">Обратный отсчёт и секундомер для управления рабочими сессиями.</div>
       </div>
       <div class="about-feature">
-        <div class="about-feature__icon">📅</div>
+        <div class="about-feature__icon"><?= icon('calendar','',22) ?></div>
         <div class="about-feature__title">Календарь с заметками</div>
         <div class="about-feature__desc">Вычёркивайте дни, оставляйте быстрые заметки прямо на дате.</div>
       </div>
       <div class="about-feature">
-        <div class="about-feature__icon">📊</div>
+        <div class="about-feature__icon"><?= icon('bar-chart-2','',22) ?></div>
         <div class="about-feature__title">Графики и таблицы</div>
         <div class="about-feature__desc">Визуализируйте данные и ведите структурированные записи прямо на дашборде.</div>
       </div>
       <div class="about-feature">
-        <div class="about-feature__icon">🌙</div>
+        <div class="about-feature__icon"><?= icon('moon','',22) ?></div>
         <div class="about-feature__title">Тёмная тема</div>
         <div class="about-feature__desc">Комфортная работа в любое время суток с мгновенным переключением.</div>
       </div>
       <div class="about-feature">
-        <div class="about-feature__icon">↔️</div>
+        <div class="about-feature__icon"><?= icon('move','',22) ?></div>
         <div class="about-feature__title">Drag &amp; Drop + Resize</div>
         <div class="about-feature__desc">Полная свобода в организации виджетов — перетаскивайте и масштабируйте.</div>
       </div>
@@ -116,7 +116,7 @@ layout_start('О проекте', ['body_class' => 'about-page']);
 
   <!-- Data Security -->
   <section class="about-section">
-    <div class="about-section__tag">🔒 Безопасность данных</div>
+    <div class="about-section__tag"><?= icon('shield','',15) ?> Безопасность данных ?></div>
     <h2 class="about-section__title">Ваши данные — только ваши</h2>
     <div class="about-security">
       <div>
@@ -146,7 +146,7 @@ layout_start('О проекте', ['body_class' => 'about-page']);
 
   <!-- Philosophy -->
   <section class="about-section">
-    <div class="about-section__tag">💭 Философия</div>
+    <div class="about-section__tag"><?= icon('info','',15) ?> Философия ?></div>
     <h2 class="about-section__title">Меньше — значит больше</h2>
     <div class="about-section__body">
       <p>
@@ -183,7 +183,7 @@ layout_start('О проекте', ['body_class' => 'about-page']);
 </footer>
 
 <script>
-function toggleTheme(){var t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',t);localStorage.setItem('poc-theme',t);var b=document.getElementById('theme-toggle');if(b)b.textContent=t==='dark'?'☀️':'🌙';}
+function toggleTheme(){var t=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',t);localStorage.setItem('poc-theme',t);var b=document.getElementById('theme-toggle');document.querySelectorAll('.icon--theme-moon').forEach(function(el){el.style.display=t==='dark'?'none':'inline-block';});document.querySelectorAll('.icon--theme-sun').forEach(function(el){el.style.display=t==='dark'?'inline-block':'none';});}
 </script>
 
 <?php layout_end(); ?>

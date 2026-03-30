@@ -166,8 +166,8 @@ async function api(action, body = {}) {
 
 function openModal(type, label) {
   pendingType = type;
-  document.getElementById("modal-title").textContent =
-    WIDGET_ICONS[type] + " " + label;
+  document.getElementById("modal-title").innerHTML =
+    (WIDGET_ICONS[type] || "") + " " + label;
   document.getElementById("modal-body").innerHTML = buildModalHTML(type);
   document.getElementById("overlay").classList.add("overlay--open");
   setTimeout(() => document.querySelector("#modal-body .input")?.focus(), 80);
@@ -415,7 +415,7 @@ async function confirmAdd() {
     document.getElementById("empty-state")?.remove();
     renderWidget(w);
     updateWidgetCount();
-    toast(WIDGET_ICONS[type] + " «" + title + "» добавлен");
+    toast('«' + title + '» добавлен');
   } catch (e) {
     console.error("confirmAdd error:", e);
     toast("Ошибка: " + e.message, "err");
