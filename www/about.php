@@ -6,7 +6,6 @@ require_once __DIR__ . '/templates/layout.php';
 layout_start('О проекте', ['body_class' => 'about-page']);
 ?>
 
-<!-- Navbar -->
 <nav class="navbar">
   <a href="/" class="logo">
     <div class="logo__mark"><?= icon('sparkles', '', 16) ?></div>
@@ -22,7 +21,6 @@ layout_start('О проекте', ['body_class' => 'about-page']);
   <?php endif; ?>
 </nav>
 
-<!-- Hero -->
 <div class="about-hero">
   <div class="about-hero__eyebrow"><?= icon('sparkles','',14) ?> Инструмент для 2026</div>
   <h1 class="about-hero__title">Point of <em>Creation</em></h1>
@@ -32,10 +30,8 @@ layout_start('О проекте', ['body_class' => 'about-page']);
   </p>
 </div>
 
-<!-- Content -->
 <div class="about-content">
 
-  <!-- Mission -->
   <section class="about-section">
     <div class="about-section__tag"><?= icon('target','',15) ?> Миссия ?></div>
     <h2 class="about-section__title">Почему это важно именно сейчас</h2>
@@ -57,7 +53,6 @@ layout_start('О проекте', ['body_class' => 'about-page']);
 
   <hr class="about-divider">
 
-  <!-- Key Features -->
   <section class="about-section">
     <div class="about-section__tag"><?= icon('zap','',15) ?> Ключевые возможности ?></div>
     <h2 class="about-section__title">Всё что нужно — в одном месте</h2>
@@ -114,7 +109,6 @@ layout_start('О проекте', ['body_class' => 'about-page']);
 
   <hr class="about-divider">
 
-  <!-- Data Security -->
   <section class="about-section">
     <div class="about-section__tag"><?= icon('shield','',15) ?> Безопасность данных ?></div>
     <h2 class="about-section__title">Ваши данные — только ваши</h2>
@@ -144,7 +138,6 @@ layout_start('О проекте', ['body_class' => 'about-page']);
 
   <hr class="about-divider">
 
-  <!-- Philosophy -->
   <section class="about-section">
     <div class="about-section__tag"><?= icon('info','',15) ?> Философия ?></div>
     <h2 class="about-section__title">Меньше — значит больше</h2>
@@ -161,9 +154,8 @@ layout_start('О проекте', ['body_class' => 'about-page']);
     </div>
   </section>
 
-</div><!-- /about-content -->
+</div>
 
-<!-- Footer -->
 <footer class="about-footer">
   <div class="about-footer__inner">
     <div>

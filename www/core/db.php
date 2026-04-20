@@ -1,9 +1,4 @@
 <?php
-/**
- * core/db.php
- * SQLite connection + auto-migration.
- */
-
 define('DB_PATH', dirname(__DIR__) . '/data/database.sqlite');
 
 function get_db(): PDO
@@ -53,7 +48,6 @@ function migrate(PDO $db): void
         );
     ");
 
-    // Seed default admin account (runs only when table is empty)
     $count = (int) $db->query("SELECT COUNT(*) FROM users")->fetchColumn();
     if ($count === 0) {
         $db->prepare("INSERT INTO users (username, password, role) VALUES (?, ?, 'admin')")

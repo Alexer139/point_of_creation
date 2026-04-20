@@ -21,7 +21,6 @@ $initial_widgets = array_map(fn($r) => [
     'position_h' => (int)$r['position_h'],
 ], $stmt->fetchAll());
 
-// Widget palette: [type, label, icon_name]
 $palette = [
   ['note',       'Заметка',             'file-text'],
   ['checklist',  'Список дел',          'list-checks'],
@@ -39,7 +38,6 @@ layout_start('Мой дашборд');
 
 <div class="app">
 
-  <!-- Navbar -->
   <nav class="navbar">
     <a href="/" class="logo">
       <div class="logo__mark"><?= icon('sparkles', '', 16) ?></div>
@@ -61,7 +59,6 @@ layout_start('Мой дашборд');
 
   <div class="main">
 
-    <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar__header">
         <div class="sidebar__clock" id="sidebar-time">00:00</div>
@@ -79,7 +76,6 @@ layout_start('Мой дашборд');
       </div>
     </aside>
 
-    <!-- Editor -->
     <div style="flex:1;display:flex;flex-direction:column;min-width:0">
       <div class="topbar">
         <span class="topbar__title">Мой дашборд</span>
@@ -99,7 +95,6 @@ layout_start('Мой дашборд');
   </div>
 </div>
 
-<!-- Modal -->
 <div class="overlay" id="overlay">
   <div class="modal">
     <div class="modal__head">

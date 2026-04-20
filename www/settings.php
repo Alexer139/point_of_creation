@@ -111,7 +111,6 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
     <div class="settings-alert settings-alert--ok">✓ <?= htmlspecialchars($s) ?></div>
   <?php endforeach; ?>
 
-  <!-- Profile -->
   <section class="scard" id="profile">
     <div class="scard__head">
       <div class="scard__icon"><?= icon('user', '', 20) ?></div>
@@ -144,7 +143,6 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
     </form>
   </section>
 
-  <!-- Password -->
   <section class="scard" id="password">
     <div class="scard__head">
       <div class="scard__icon"><?= icon('lock', '', 20) ?></div>
@@ -175,7 +173,6 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
     </form>
   </section>
 
-  <!-- Stats -->
   <section class="scard" id="stats">
     <div class="scard__head">
       <div class="scard__icon"><?= icon('bar-chart-2', '', 20) ?></div>
@@ -204,7 +201,6 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
     </div>
   </section>
 
-  <!-- Danger zone -->
   <section class="scard scard--danger" id="danger">
     <div class="scard__head">
       <div class="scard__icon"><?= icon('alert-triangle', '', 20) ?></div>
@@ -245,7 +241,6 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
 
 </div>
 
-<!-- Footer -->
 <footer class="about-footer">
   <div class="about-footer__inner">
     <div>

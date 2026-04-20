@@ -1,9 +1,3 @@
-/* ==========================================================
-   Point of Creation — main stylesheet
-   Light / Dark theme via [data-theme="dark"] on <html>
-   ========================================================== */
-
-/* ── Custom properties — Light ──────────────────────────── */
 :root {
   --bg: #fffaf5;
   --bg2: #fff8f0;
@@ -26,7 +20,6 @@
   --dot-color: rgba(220, 200, 185, 0.55);
 }
 
-/* ── Custom properties — Dark ───────────────────────────── */
 [data-theme="dark"] {
   --bg: #18120c;
   --bg2: #1f170e;
@@ -47,7 +40,6 @@
   --dot-color: rgba(80, 55, 35, 0.7);
 }
 
-/* ── SVG Icons ──────────────────────────────────────────────── */
 .icon {
   display: inline-block; vertical-align: middle;
   flex-shrink: 0; stroke: currentColor;
@@ -58,7 +50,6 @@
 .icon--xl  { width: 28px; height: 28px; }
 
 
-/* ── Reset & base ───────────────────────────────────────── */
 *,
 *::before,
 *::after {
@@ -98,7 +89,6 @@ body {
   font-family: "Fraunces", serif;
 }
 
-/* ── App shell ───────────────────────────────────────────── */
 .app {
   display: flex;
   flex-direction: column;
@@ -111,7 +101,6 @@ body {
   overflow: hidden;
 }
 
-/* ── Navbar ─────────────────────────────────────────────── */
 .navbar {
   background: var(--card);
   border-bottom: 1.5px solid var(--border);
@@ -183,9 +172,6 @@ body {
   color: var(--text2);
 }
 
-/* ── Theme toggle ────────────────────────────────────────── */
-
-/* ── Theme toggle icon states ───────────────────────────────── */
 .icon--theme-sun  { display: none; }
 .icon--theme-moon { display: inline-block; }
 [data-theme="dark"] .icon--theme-sun  { display: inline-block; }
@@ -210,7 +196,6 @@ body {
   transform: scale(1.07);
 }
 
-/* ── Buttons ─────────────────────────────────────────────── */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -277,7 +262,6 @@ body {
   border-color: rgba(251, 113, 133, 0.3);
 }
 
-/* ── Sidebar ─────────────────────────────────────────────── */
 .sidebar {
   width: 252px;
   min-width: 252px;
@@ -362,7 +346,6 @@ body {
   transition: background 0.25s;
 }
 
-/* ── Topbar ──────────────────────────────────────────────── */
 .topbar {
   background: var(--card);
   border-bottom: 1.5px solid var(--border);
@@ -407,7 +390,6 @@ body {
   opacity: 1;
 }
 
-/* ── Canvas ──────────────────────────────────────────────── */
 .canvas {
   flex: 1;
   overflow-y: auto;
@@ -428,7 +410,6 @@ body {
   align-items: start;
 }
 
-/* ── Empty state ─────────────────────────────────────────── */
 .canvas__empty {
   grid-column: 1/-1;
   display: flex;
@@ -474,7 +455,6 @@ body {
   }
 }
 
-/* ── Widget card ─────────────────────────────────────────── */
 .widget {
   background: var(--card);
   border: 1.5px solid var(--border);
@@ -490,13 +470,11 @@ body {
     background 0.25s;
   position: relative;
   min-height: 120px;
-  /* Clip inner content but allow resize handle and popover to overflow */
   clip-path: none;
 }
 .widget > *:not(.resize-handle) {
   border-radius: inherit;
 }
-/* Inner clip to keep card rounded while allowing overflow for popover */
 .widget__bar,
 .widget__head {
   border-radius: 0;
@@ -633,12 +611,10 @@ body {
   overflow: hidden;
   position: relative;
 }
-/* clip body content but allow calendar popover through */
 .widget__body.cal-overflow {
   overflow: visible;
 }
 
-/* ── Resize handles ──────────────────────────────────────── */
 .resize-handle-s,
 .resize-handle-e,
 .resize-handle-se {
@@ -647,7 +623,6 @@ body {
   transition: opacity 0.2s;
   z-index: 10;
 }
-/* South-East corner */
 .resize-handle-se {
   bottom: 0;
   right: 0;
@@ -669,7 +644,6 @@ body {
   border-radius: 0 0 3px 0;
   transition: border-color 0.15s;
 }
-/* East edge for horizontal-only resize */
 .resize-handle-e {
   top: 38px;
   right: -4px;
@@ -689,7 +663,6 @@ body {
   background: var(--border2);
   transition: background 0.15s;
 }
-/* South edge */
 .resize-handle-s {
   bottom: -4px;
   left: 20px;
@@ -723,7 +696,6 @@ body {
   background: var(--amber);
 }
 
-/* ── Grid span / row helpers ─────────────────────────────── */
 .col-2 {
   grid-column: span 2;
 }
@@ -741,12 +713,10 @@ body {
   grid-row: span 3;
   min-height: 360px;
 }
-/* When resized manually with pixel width, break out of grid span */
 .widget--resized-w {
   grid-column: auto !important;
 }
 
-/* ── Drag state ──────────────────────────────────────────── */
 .widget--dragging {
   opacity: 0.55;
   box-shadow: 0 16px 48px rgba(120, 80, 50, 0.25) !important;
@@ -761,7 +731,6 @@ body {
   background: var(--bg2) !important;
 }
 
-/* ── Metric widget ───────────────────────────────────────── */
 .metric {
   display: flex;
   flex-direction: column;
@@ -841,7 +810,6 @@ body {
   gap: 0.5rem;
 }
 
-/* ── Note widget ─────────────────────────────────────────── */
 .note-textarea {
   width: 100%;
   height: 100%;
@@ -860,7 +828,6 @@ body {
   color: var(--text3);
 }
 
-/* ── Checklist widget ────────────────────────────────────── */
 .checklist {
   display: flex;
   flex-direction: column;
@@ -974,7 +941,6 @@ body {
   margin-top: 0.5rem;
 }
 
-/* ── Goal widget ─────────────────────────────────────────── */
 .goal {
   display: flex;
   flex-direction: column;
@@ -1031,7 +997,6 @@ body {
   font-weight: 600;
 }
 
-/* ── Timer widget ────────────────────────────────────────── */
 .timer {
   display: flex;
   flex-direction: column;
@@ -1108,7 +1073,6 @@ body {
   color: var(--amber);
 }
 
-/* ── Chart widget ────────────────────────────────────────── */
 .chart-wrap {
   position: relative;
   width: 100%;
@@ -1116,7 +1080,6 @@ body {
   min-height: 140px;
 }
 
-/* ── Table widget ────────────────────────────────────────── */
 .data-table-wrap {
   overflow: auto;
   height: 100%;
@@ -1175,7 +1138,6 @@ body {
   color: var(--amber);
 }
 
-/* ── Calendar widget ─────────────────────────────────────── */
 .cal {
   display: flex;
   flex-direction: column;
@@ -1282,7 +1244,6 @@ body {
   background: var(--amber);
 }
 
-/* Calendar popover */
 .cal__popover {
   position: fixed;
   z-index: 9000;
@@ -1366,7 +1327,6 @@ body {
   filter: brightness(1.08);
 }
 
-/* ── Shared input ────────────────────────────────────────── */
 .input {
   width: 100%;
   padding: 0.5rem 0.75rem;
@@ -1411,7 +1371,6 @@ body {
   min-height: 80px;
 }
 
-/* ── Modal ───────────────────────────────────────────────── */
 .overlay {
   position: fixed;
   inset: 0;
@@ -1502,7 +1461,6 @@ body {
   flex-shrink: 0;
 }
 
-/* ── Form fields ─────────────────────────────────────────── */
 .field {
   margin-bottom: 1rem;
 }
@@ -1544,7 +1502,6 @@ body {
   margin-bottom: 0.25rem;
 }
 
-/* ── Auth pages ──────────────────────────────────────────── */
 .auth-page {
   min-height: 100vh;
   display: flex;
@@ -1675,7 +1632,6 @@ body {
   margin-top: 0.375rem;
 }
 
-/* ── Admin panel ─────────────────────────────────────────── */
 .admin-page {
   background: var(--bg);
   min-height: 100vh;
@@ -1808,7 +1764,6 @@ body {
   gap: 0.5rem;
 }
 
-/* ── Toasts ──────────────────────────────────────────────── */
 .toasts {
   position: fixed;
   top: 1rem;
@@ -1869,7 +1824,6 @@ body {
   }
 }
 
-/* ── About page ──────────────────────────────────────────── */
 .about-page {
   background: var(--bg);
   min-height: 100vh;
@@ -2067,7 +2021,6 @@ body {
   gap: 0.375rem;
 }
 
-/* ── About footer ────────────────────────────────────────── */
 .about-footer {
   background: var(--card);
   border-top: 1.5px solid var(--border);
@@ -2161,7 +2114,6 @@ body {
 }
 
 
-/* ── Nav user as link ───────────────────────────────────────── */
 a.nav-user {
   text-decoration: none;
   transition: background .15s, border-color .15s, color .15s;
@@ -2176,9 +2128,7 @@ a.nav-user--active {
   color: var(--text);
 }
 
-/* ══════════════════════════════════════════════════════════════
-   Settings page
-   ══════════════════════════════════════════════════════════════ */
+
 .settings-page { background: var(--bg); min-height: 100vh; display: flex; flex-direction: column; }
 
 .settings-center {
@@ -2189,7 +2139,6 @@ a.nav-user--active {
   flex: 1;
 }
 
-/* ── Alert ── */
 .settings-alert {
   border-radius: var(--radius); padding: .75rem 1rem;
   font-size: .875rem; font-weight: 500;
@@ -2199,7 +2148,6 @@ a.nav-user--active {
 [data-theme="dark"] .settings-alert--ok  { background: rgba(132,169,140,.12); color: #86efac; border-color: rgba(132,169,140,.3); }
 [data-theme="dark"] .settings-alert--err { background: rgba(251,113,133,.1);  color: #fb7185; border-color: rgba(251,113,133,.25); }
 
-/* ── Section card ── */
 .scard {
   background: var(--card); border: 1.5px solid var(--border);
   border-radius: var(--radius-lg); padding: 1.75rem;
@@ -2220,7 +2168,6 @@ a.nav-user--active {
 .scard__title { font-size: 1rem; font-weight: 700; color: var(--text); }
 .scard__sub   { font-size: .8125rem; color: var(--text3); margin-top: .125rem; }
 
-/* ── Avatar ── */
 .s-avatar {
   display: flex; align-items: center; gap: 1rem;
   background: var(--bg2); border: 1px solid var(--border);
@@ -2237,12 +2184,10 @@ a.nav-user--active {
 .s-avatar__role  { font-size: .8125rem; color: var(--amber); font-weight: 600; margin-top: .1rem; }
 .s-avatar__since { font-size: .75rem; color: var(--text3); margin-top: .1rem; }
 
-/* ── Form inside scard ── */
 .scard form { display: flex; flex-direction: column; gap: .875rem; }
 .scard form .btn { align-self: flex-start; }
 .field__hint { font-size: .75rem; color: var(--text3); margin-top: .35rem; }
 
-/* ── Stats ── */
 .s-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem; }
 @media (max-width: 500px) { .s-stats { grid-template-columns: repeat(2, 1fr); } }
 .s-stat {
@@ -2252,7 +2197,6 @@ a.nav-user--active {
 .s-stat__val { font-size: 1.75rem; font-weight: 800; color: var(--amber); font-family: 'Fraunces', serif; line-height: 1; }
 .s-stat__lbl { font-size: .75rem; color: var(--text3); margin-top: .375rem; }
 
-/* ── Danger row ── */
 .s-danger-row {
   display: flex; align-items: center; justify-content: space-between;
   gap: 1rem; flex-wrap: wrap;
@@ -2263,7 +2207,6 @@ a.nav-user--active {
 .s-danger-row__title { font-weight: 600; color: var(--text); }
 .s-danger-row__sub   { font-size: .8125rem; color: var(--text3); margin-top: .2rem; }
 
-/* ── Delete account form (collapsed by default) ── */
 .s-delete-form {
   display: none; flex-direction: column; gap: .875rem;
   background: var(--bg2); border: 1px solid #fecdd3;

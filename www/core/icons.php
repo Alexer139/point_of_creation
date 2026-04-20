@@ -1,10 +1,4 @@
 <?php
-/**
- * core/icons.php
- * Inline SVG icons (Lucide subset).
- * Usage: icon('user') or icon('sun', 'my-class', 20)
- */
-
 function icon(string $name, string $class = '', int $size = 16): string
 {
     $c = 'icon' . ($class ? " $class" : '');

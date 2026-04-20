@@ -1,9 +1,4 @@
 <?php
-/**
- * core/auth.php
- * Session management, CSRF, login/register helpers.
- */
-
 require_once __DIR__ . '/db.php';
 
 if (session_status() === PHP_SESSION_NONE) {
