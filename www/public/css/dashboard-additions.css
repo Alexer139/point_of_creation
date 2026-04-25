@@ -57,7 +57,7 @@
   left: 0;
   z-index: 200;
   min-width: 240px;
-  background: var(--surface-1);
+  background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
