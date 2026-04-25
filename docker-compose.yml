@@ -1,14 +1,43 @@
 services:
+
+  # ── MySQL ──────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: poc-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: password_poc
+      MYSQL_DATABASE:      poc
+      MYSQL_USER:          poc
+      MYSQL_PASSWORD:      password_poc
+    volumes:
+      - db_data:/var/lib/mysql
+      # Опционально: выполнить SQL при первом запуске
+      # - ./migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost",
+             "-u", "poc", "-password_poc"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── PHP / Apache ──────────────────────────────────────────
   app:
     build: .
-    container_name: personal-os
+    container_name: poc-app
     ports:
       - "8080:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST:     db
+      DB_PORT:     3306
+      DB_NAME:     poc
+      DB_USER:     poc
+      DB_PASSWORD: password_poc
     volumes:
-      # Связываем текущую папку с папкой Apache внутри контейнера
-      - ./www:/var/www/html 
-      # Оставляем ваш том для базы данных
-      - db_data:/data
+      - ./www:/var/www/html
     restart: unless-stopped
 
 volumes:

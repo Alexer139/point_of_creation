@@ -41,17 +41,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $current = $_POST['current_password'] ?? '';
             $new     = $_POST['new_password']     ?? '';
             $confirm = $_POST['confirm_password'] ?? '';
-            $stmt = $db->prepare('SELECT password FROM users WHERE id = ?');
+
+            // ИСПРАВЛЕНО: password → password_hash
+            $stmt = $db->prepare('SELECT password_hash FROM users WHERE id = ?');
             $stmt->execute([$user['id']]);
             $row = $stmt->fetch();
-            if (!password_verify($current, $row['password'])) {
+
+            if (!$row || !password_verify($current, $row['password_hash'])) {
                 $errors[] = 'Текущий пароль введён неверно.';
             } elseif (strlen($new) < 6) {
                 $errors[] = 'Новый пароль: минимум 6 символов.';
             } elseif ($new !== $confirm) {
                 $errors[] = 'Новый пароль и подтверждение не совпадают.';
             } else {
-                $db->prepare('UPDATE users SET password = ? WHERE id = ?')
+                // ИСПРАВЛЕНО: password → password_hash
+                $db->prepare('UPDATE users SET password_hash = ? WHERE id = ?')
                    ->execute([password_hash($new, PASSWORD_DEFAULT), $user['id']]);
                 $success[] = 'Пароль успешно изменён.';
             }
@@ -59,10 +63,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($action === 'delete_account') {
             $pass = $_POST['confirm_password_delete'] ?? '';
-            $stmt = $db->prepare('SELECT password FROM users WHERE id = ?');
+
+            // ИСПРАВЛЕНО: password → password_hash
+            $stmt = $db->prepare('SELECT password_hash FROM users WHERE id = ?');
             $stmt->execute([$user['id']]);
             $row = $stmt->fetch();
-            if (!password_verify($pass, $row['password'])) {
+
+            if (!$row || !password_verify($pass, $row['password_hash'])) {
                 $errors[] = 'Неверный пароль. Аккаунт не удалён.';
             } else {
                 $db->prepare('DELETE FROM users WHERE id = ?')->execute([$user['id']]);
@@ -74,7 +81,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$stmt = $db->prepare('SELECT COUNT(*) as cnt, MAX(updated_at) as last FROM widgets WHERE user_id = ?');
+// ИСПРАВЛЕНО: виджеты теперь привязаны к страницам → дашбордам → владельцу
+// Считаем все виджеты пользователя через JOIN
+$stmt = $db->prepare('
+    SELECT COUNT(w.id) as cnt, MAX(w.updated_at) as last
+    FROM widgets w
+    JOIN pages p       ON p.id = w.page_id
+    JOIN dashboards d  ON d.id = p.dashboard_id
+    WHERE d.owner_id = ?
+');
 $stmt->execute([$user['id']]);
 $wstats = $stmt->fetch();
 
@@ -94,7 +109,9 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
   <a href="/settings.php" class="nav-user nav-user--active" title="Настройки профиля">
     <?= icon('user', '', 14) ?> <?= htmlspecialchars($user['username']) ?>
   </a>
-  <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Сменить тему"><?= icon('moon', 'icon--theme-moon', 16) ?><?= icon('sun', 'icon--theme-sun', 16) ?></button>
+  <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Сменить тему">
+    <?= icon('moon', 'icon--theme-moon', 16) ?><?= icon('sun', 'icon--theme-sun', 16) ?>
+  </button>
   <a href="/" class="btn btn--ghost">← Дашборд</a>
   <?php if (is_admin()): ?>
     <a href="/admin.php" class="btn btn--admin"><?= icon('settings', '', 14) ?> Admin</a>
@@ -123,7 +140,11 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
       <div class="s-avatar__circle"><?= mb_strtoupper(mb_substr($user['username'], 0, 1)) ?></div>
       <div>
         <div class="s-avatar__name"><?= htmlspecialchars($user['username']) ?></div>
-        <div class="s-avatar__role"><?= $user['role'] === 'admin' ? icon('star','',13).' Администратор' : icon('user','',13).' Пользователь' ?></div>
+        <div class="s-avatar__role">
+          <?= $user['role'] === 'admin'
+              ? icon('star','',13).' Администратор'
+              : icon('user','',13).' Пользователь' ?>
+        </div>
         <?php if ($urow): ?>
           <div class="s-avatar__since">С нами с <?= date('d.m.Y', strtotime($urow['created_at'])) ?></div>
         <?php endif; ?>
@@ -183,11 +204,13 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
     </div>
     <div class="s-stats">
       <div class="s-stat">
-        <div class="s-stat__val"><?= (int)$wstats['cnt'] ?></div>
+        <div class="s-stat__val"><?= (int)($wstats['cnt'] ?? 0) ?></div>
         <div class="s-stat__lbl">Виджетов</div>
       </div>
       <div class="s-stat">
-        <div class="s-stat__val"><?= $wstats['last'] ? date('d.m', strtotime($wstats['last'])) : '—' ?></div>
+        <div class="s-stat__val">
+          <?= !empty($wstats['last']) ? date('d.m', strtotime($wstats['last'])) : '—' ?>
+        </div>
         <div class="s-stat__lbl">Последнее изменение</div>
       </div>
       <div class="s-stat">
@@ -212,7 +235,7 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
     <div class="s-danger-row">
       <div>
         <div class="s-danger-row__title">Удалить аккаунт</div>
-        <div class="s-danger-row__sub">Аккаунт и все виджеты будут удалены без возможности восстановления</div>
+        <div class="s-danger-row__sub">Аккаунт и все данные будут удалены без возможности восстановления</div>
       </div>
       <button class="btn btn--danger" type="button"
               onclick="document.getElementById('delete-account-form').classList.toggle('s-delete-form--open')">
