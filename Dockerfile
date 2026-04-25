@@ -22,6 +22,6 @@ RUN chown -R www-data:www-data /var/www/html
 
 # Railway прокидывает порт через переменную PORT. 
 # Мы подставим его в конфиг Nginx перед запуском.
-CMD sed -i "s/8080/\$PORT/g" /etc/nginx/sites-available/default && \
+CMD sed -i "s/8080/$PORT/g" /etc/nginx/sites-available/default && \
     php-fpm -D && \
     nginx -g 'daemon off;'
