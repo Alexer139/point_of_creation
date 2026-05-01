@@ -1,23 +1,15 @@
 <?php
-/**
- * register.php
- * Point of Creation — регистрация нового пользователя
- */
-
 require_once __DIR__ . '/core/auth.php';
+require_once __DIR__ . '/core/icons.php';
 require_once __DIR__ . '/templates/layout.php';
 
-if (is_logged_in()) {
-    header('Location: /');
-    exit;
-}
+if (is_logged_in()) { header('Location: /'); exit; }
 
-$error   = '';
-$success = '';
+$error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf($_POST['csrf'] ?? '')) {
-        $error = 'Неверный CSRF-токен. Обновите страницу.';
+        $error = 'Ошибка безопасности. Обновите страницу.';
     } else {
         $result = register_user(
             $_POST['username'] ?? '',
@@ -25,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_POST['password'] ?? ''
         );
         if ($result['ok']) {
-            set_flash('success', 'Аккаунт создан. Войдите, чтобы продолжить.');
+            set_flash('reg_success', 'Аккаунт создан. Добро пожаловать!');
             header('Location: /login.php');
             exit;
         }
@@ -36,47 +28,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 layout_start('Регистрация', ['body_class' => 'auth-page']);
 ?>
 
-<div class="auth-wrap">
-  <div class="auth-card">
-    <div class="auth-logo">
-      <span class="logo__mark">✦</span>
-      <span class="logo__text">Point of <em>Creation</em></span>
-    </div>
-    <h1 class="auth-title">Создать аккаунт</h1>
+<div class="auth-card">
+  <div class="auth-card__logo">
+    <div class="auth-card__logo-icon">✦</div>
+    <h1 class="auth-card__logo-title">Point of <em>Creation</em></h1>
+    <p class="auth-card__logo-sub">Создайте своё пространство для продуктивности</p>
+  </div>
 
+  <div class="auth-card__body">
     <?php if ($error): ?>
-      <div class="alert alert--error"><?= htmlspecialchars($error) ?></div>
+      <div class="alert alert--error">✕ <?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
 
-    <form method="POST" action="/register.php" class="auth-form">
+    <form method="POST" novalidate>
       <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
 
       <div class="field">
-        <label class="field__label" for="username">Имя пользователя</label>
-        <input type="text" id="username" name="username" class="input"
+        <label class="field__label" for="username">Логин</label>
+        <input class="input" type="text" id="username" name="username"
                value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"
-               placeholder="только латиница, цифры, _" autocomplete="username" required>
+               placeholder="только a–z, 0–9 и _"
+               autocomplete="username" required autofocus
+               minlength="3" maxlength="32">
       </div>
 
       <div class="field">
         <label class="field__label" for="email">Email</label>
-        <input type="email" id="email" name="email" class="input"
+        <input class="input" type="email" id="email" name="email"
                value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
-               placeholder="you@example.com" autocomplete="email" required>
-        <span class="field__hint">Используется для приглашений в дашборды</span>
+               placeholder="you@example.com"
+               autocomplete="email" required>
       </div>
 
       <div class="field">
         <label class="field__label" for="password">Пароль</label>
-        <input type="password" id="password" name="password" class="input"
-               placeholder="минимум 6 символов" autocomplete="new-password" required>
+        <input class="input" type="password" id="password" name="password"
+               placeholder="минимум 6 символов"
+               autocomplete="new-password" required minlength="6">
       </div>
 
-      <button type="submit" class="btn btn--warm btn--full">Зарегистрироваться</button>
+      <div class="field" style="margin-top:1.5rem">
+        <button type="submit" class="btn btn--warm btn--full">Создать аккаунт →</button>
+      </div>
     </form>
 
-    <p class="auth-alt">Уже есть аккаунт? <a href="/login.php">Войти</a></p>
+    <div class="auth-card__footer">
+      Уже есть аккаунт? <a href="/login.php">Войти</a>
+    </div>
   </div>
+
 </div>
 
 <?php layout_end(); ?>

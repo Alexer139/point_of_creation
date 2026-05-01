@@ -37,6 +37,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
+        if ($action === 'change_email') {
+            $new_email = trim($_POST['email'] ?? '');
+            $pass      = $_POST['confirm_password_email'] ?? '';
+
+            if (!filter_var($new_email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = 'Некорректный email-адрес.';
+            } else {
+                $stmt = $db->prepare('SELECT password_hash FROM users WHERE id = ?');
+                $stmt->execute([$user['id']]);
+                $row = $stmt->fetch();
+                if (!$row || !password_verify($pass, $row['password_hash'])) {
+                    $errors[] = 'Неверный пароль. Email не изменён.';
+                } else {
+                    $stmt = $db->prepare('SELECT id FROM users WHERE email = ? AND id != ?');
+                    $stmt->execute([$new_email, $user['id']]);
+                    if ($stmt->fetch()) {
+                        $errors[] = 'Этот email уже используется другим аккаунтом.';
+                    } else {
+                        $db->prepare('UPDATE users SET email = ? WHERE id = ?')
+                           ->execute([$new_email, $user['id']]);
+                        $_SESSION['user']['email'] = $new_email;
+                        $user = current_user();
+                        $success[] = 'Email успешно изменён.';
+                    }
+                }
+            }
+        }
+
         if ($action === 'change_password') {
             $current = $_POST['current_password'] ?? '';
             $new     = $_POST['new_password']     ?? '';
@@ -133,7 +161,7 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
       <div class="scard__icon"><?= icon('user', '', 20) ?></div>
       <div>
         <div class="scard__title">Профиль</div>
-        <div class="scard__sub">Имя пользователя для входа в систему</div>
+        <div class="scard__sub">Имя пользователя и email аккаунта</div>
       </div>
     </div>
     <div class="s-avatar">
@@ -161,8 +189,34 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
         <div class="field__hint">Только a–z, 0–9 и _. От 3 до 32 символов.</div>
       </div>
       <button class="btn btn--warm" type="submit"><?= icon('save','',14) ?> Сохранить имя</button>
-    </form>
-  </section>
+      </form>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:1.5rem 0">
+
+      <div class="scard__head" style="margin-bottom:1rem">
+        <div class="scard__icon"><?= icon('mail', '', 20) ?></div>
+        <div>
+          <div class="scard__title">Email</div>
+          <div class="scard__sub">Используется для приглашений в дашборды</div>
+        </div>
+      </div>
+      <form method="post">
+        <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
+        <input type="hidden" name="action" value="change_email">
+        <div class="field">
+          <label class="field__label">Новый email</label>
+          <input class="input" type="email" name="email"
+                 value="<?= htmlspecialchars($user['email'] ?? '') ?>"
+                 placeholder="you@example.com" required autocomplete="email">
+        </div>
+        <div class="field">
+          <label class="field__label">Подтвердите паролем</label>
+          <input class="input" type="password" name="confirm_password_email"
+                 placeholder="Ваш текущий пароль" required autocomplete="current-password">
+        </div>
+        <button class="btn btn--warm" type="submit"><?= icon('save','',14) ?> Сохранить email</button>
+      </form>
+    </section>
 
   <section class="scard" id="password">
     <div class="scard__head">
