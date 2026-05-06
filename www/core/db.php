@@ -18,18 +18,18 @@ function get_db(): PDO
         return $pdo;
     }
 
-    $host = getenv('DB_HOST')     ?: getenv('MYSQLHOST')     ?: '127.0.0.1';
-    $port = getenv('DB_PORT')     ?: getenv('MYSQLPORT')     ?: '3306';
-    $name = getenv('DB_NAME')     ?: getenv('MYSQLDATABASE') ?: 'poc';
-    $user = getenv('DB_USER')     ?: getenv('MYSQLUSER')     ?: 'poc';
+    $host = getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: '127.0.0.1';
+    $port = getenv('DB_PORT') ?: getenv('MYSQLPORT') ?: '3306';
+    $name = getenv('DB_NAME') ?: getenv('MYSQLDATABASE') ?: 'poc';
+    $user = getenv('DB_USER') ?: getenv('MYSQLUSER') ?: 'poc';
     $pass = getenv('DB_PASSWORD') ?: getenv('MYSQLPASSWORD') ?: '';
 
     $dsn = "mysql:host={$host};port={$port};dbname={$name};charset=utf8mb4";
 
     $pdo = new PDO($dsn, $user, $pass, [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES   => false,
+        PDO::ATTR_EMULATE_PREPARES => false,
     ]);
 
     migrate($pdo);
@@ -145,6 +145,17 @@ function migrate(PDO $db): void
                     INSERT INTO `users` (`username`, `email`, `password_hash`, `role`)
                     VALUES (?, ?, ?, 'admin')
                 ")->execute(['admin', 'admin@localhost', password_hash('admin456', PASSWORD_DEFAULT)]);
+            }
+        },
+        '002_soft_delete' => function (PDO $db) {
+            // Добавить поле deleted_at для Soft Delete
+            $cols = $db->query("SHOW COLUMNS FROM `users` LIKE 'deleted_at'")->fetchAll();
+            if (empty($cols)) {
+                $db->exec("
+                    ALTER TABLE `users`
+                    ADD COLUMN `deleted_at` DATETIME NULL DEFAULT NULL AFTER `created_at`,
+                    ADD KEY `idx_users_deleted` (`deleted_at`)
+                ");
             }
         },
     ];

@@ -77,7 +77,7 @@ function get_flash(string $key): string
 function register_user(string $username, string $email, string $password): array
 {
     $username = trim($username);
-    $email    = trim($email);
+    $email = trim($email);
 
     if (strlen($username) < 3 || strlen($username) > 32) {
         return ['ok' => false, 'error' => 'Логин: от 3 до 32 символов'];
@@ -156,12 +156,17 @@ function login_user(string $login, string $password): array
         return ['ok' => false, 'error' => 'Неверный логин или пароль'];
     }
 
+    // Проверка soft delete — деактивированный пользователь не может войти
+    if (!empty($user['deleted_at'])) {
+        return ['ok' => false, 'error' => 'Этот аккаунт деактивирован. Обратитесь к администратору.'];
+    }
+
     session_regenerate_id(true);
     $_SESSION['user'] = [
-        'id'       => (int) $user['id'],
+        'id' => (int) $user['id'],
         'username' => $user['username'],
-        'email'    => $user['email'],
-        'role'     => $user['role'],
+        'email' => $user['email'],
+        'role' => $user['role'],
     ];
 
     // Запомнить последний активный дашборд (сбросить при входе)
