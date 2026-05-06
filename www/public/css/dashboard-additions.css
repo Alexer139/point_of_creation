@@ -22,9 +22,11 @@
   background: var(--surface-2);
   color: var(--text-1);
   cursor: pointer;
-  font-size: .85rem;
+  font-size: 0.85rem;
   font-weight: 500;
-  transition: background .15s, border-color .15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
   max-width: 220px;
 }
 .dashboard-selector__btn:hover {
@@ -41,8 +43,8 @@
 
 .ds-chevron {
   flex-shrink: 0;
-  opacity: .6;
-  transition: transform .2s;
+  opacity: 0.6;
+  transition: transform 0.2s;
 }
 .dashboard-menu--open ~ * .ds-chevron,
 .dashboard-selector__btn[aria-expanded="true"] .ds-chevron {
@@ -65,11 +67,17 @@
 }
 .dashboard-menu--open {
   display: block;
-  animation: menu-in .15s ease;
+  animation: menu-in 0.15s ease;
 }
 @keyframes menu-in {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dashboard-menu__list {
@@ -85,9 +93,9 @@
   padding: 8px 10px;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: .84rem;
+  font-size: 0.84rem;
   color: var(--text-1);
-  transition: background .12s;
+  transition: background 0.12s;
 }
 .dashboard-menu__item:hover {
   background: var(--surface-2);
@@ -102,14 +110,28 @@
   border-top: 1px solid var(--border);
 }
 
-.dm-icon { flex-shrink: 0; opacity: .7; }
-.dm-icon--shared   { color: var(--accent); }
-.dm-icon--personal { color: var(--text-2); }
-.dm-icon--invited  { color: #84a98c; }
+.dm-icon {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+.dm-icon--shared {
+  color: var(--accent);
+}
+.dm-icon--personal {
+  color: var(--text-2);
+}
+.dm-icon--invited {
+  color: #84a98c;
+}
 
-.dm-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dm-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .dm-role {
-  font-size: .72rem;
+  font-size: 0.72rem;
   padding: 1px 5px;
   border-radius: 20px;
   background: var(--surface-3);
@@ -122,12 +144,19 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px; height: 20px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   flex-shrink: 0;
 }
-.badge--shared   { background: var(--accent-subtle); color: var(--accent); }
-.badge--personal { background: var(--surface-3);     color: var(--text-2); }
+.badge--shared {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+.badge--personal {
+  background: var(--surface-3);
+  color: var(--text-2);
+}
 
 /* ── Pages Bar (вкладки страниц) ───────────────────────────── */
 
@@ -159,13 +188,17 @@
   border-bottom: 2px solid transparent;
   background: transparent;
   color: var(--text-2);
-  font-size: .83rem;
+  font-size: 0.83rem;
   cursor: pointer;
-  transition: color .15s, border-color .15s;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
   position: relative;
   white-space: nowrap;
 }
-.page-tab:hover { color: var(--text-1); }
+.page-tab:hover {
+  color: var(--text-1);
+}
 .page-tab--active {
   color: var(--accent);
   border-bottom-color: var(--accent);
@@ -176,22 +209,28 @@
   display: none;
   align-items: center;
   justify-content: center;
-  width: 14px; height: 14px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: var(--surface-3);
-  opacity: .6;
+  opacity: 0.6;
   font-size: 9px;
   cursor: pointer;
   margin-left: 2px;
 }
-.page-tab:hover .page-tab__del { display: inline-flex; }
-.page-tab__del:hover { opacity: 1; background: var(--danger-subtle); }
+.page-tab:hover .page-tab__del {
+  display: inline-flex;
+}
+.page-tab__del:hover {
+  opacity: 1;
+  background: var(--danger-subtle);
+}
 
 .page-tab__rename-input {
   border: 1px solid var(--accent);
   border-radius: 3px;
   padding: 1px 4px;
-  font-size: .83rem;
+  font-size: 0.83rem;
   width: 90px;
   background: var(--surface-1);
   color: var(--text-1);
@@ -200,14 +239,19 @@
 
 .pages-add-btn {
   flex-shrink: 0;
-  width: 28px; height: 28px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-sm);
   border: 1px dashed var(--border);
   background: transparent;
   color: var(--text-3);
   cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: color .15s, border-color .15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
 }
 .pages-add-btn:hover {
   color: var(--accent);
@@ -215,12 +259,14 @@
 }
 
 /* Spacer */
-.topbar__spacer { flex: 1; }
+.topbar__spacer {
+  flex: 1;
+}
 
 /* ── Share modal ───────────────────────────────────────────── */
 
 .share-hint {
-  font-size: .85rem;
+  font-size: 0.85rem;
   color: var(--text-2);
   margin-bottom: 12px;
 }
@@ -231,7 +277,10 @@
   gap: 8px;
   flex-wrap: wrap;
 }
-.input--grow { flex: 1; min-width: 160px; }
+.input--grow {
+  flex: 1;
+  min-width: 160px;
+}
 
 .share-members {
   margin-top: 16px;
@@ -239,13 +288,17 @@
   flex-direction: column;
   gap: 8px;
 }
-.share-loading, .share-empty, .share-error {
+.share-loading,
+.share-empty,
+.share-error {
   text-align: center;
   color: var(--text-3);
-  font-size: .85rem;
+  font-size: 0.85rem;
   padding: 16px;
 }
-.share-error { color: var(--danger); }
+.share-error {
+  color: var(--danger);
+}
 
 .share-member {
   display: flex;
@@ -257,18 +310,36 @@
   background: var(--surface-2);
 }
 .sm-avatar {
-  width: 32px; height: 32px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--accent-subtle);
   color: var(--accent);
   font-weight: 700;
-  font-size: .9rem;
-  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
-.sm-info { flex: 1; overflow: hidden; }
-.sm-name { display: block; font-size: .85rem; font-weight: 600; color: var(--text-1); }
-.sm-email { display: block; font-size: .75rem; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sm-info {
+  flex: 1;
+  overflow: hidden;
+}
+.sm-name {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-1);
+}
+.sm-email {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* ── Viewer notice ─────────────────────────────────────────── */
 
@@ -276,7 +347,7 @@
   color: #84a98c;
 }
 .sidebar__hint {
-  font-size: .78rem;
+  font-size: 0.78rem;
   color: var(--text-3);
   line-height: 1.5;
   padding: 0 4px;
@@ -294,10 +365,12 @@
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--text-2);
-  font-size: .83rem;
+  font-size: 0.83rem;
   cursor: pointer;
   text-align: left;
-  transition: background .12s, color .12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
 }
 .sidebar__action:hover {
   background: var(--surface-2);
@@ -326,7 +399,7 @@
 
 .btn--xs {
   padding: 3px 8px;
-  font-size: .75rem;
+  font-size: 0.75rem;
 }
 .btn--full {
   width: 100%;
@@ -337,7 +410,46 @@
 
 .field__hint {
   display: block;
-  font-size: .75rem;
+  font-size: 0.75rem;
   color: var(--text-3);
   margin-top: 3px;
+}
+
+/* ── Read-only widget (viewer role) ─────────────────────────── */
+.widget--readonly {
+  cursor: default !important;
+}
+.widget--readonly .widget__head {
+  cursor: default !important;
+}
+.widget--readonly .note-textarea,
+.widget--readonly .checklist__text,
+.widget--readonly .data-table td[contenteditable] {
+  pointer-events: none;
+  user-select: text;
+  background: transparent;
+  cursor: default;
+}
+.widget--readonly .checklist__check {
+  pointer-events: none;
+  opacity: 0.6;
+}
+.widget--readonly .checklist__delete,
+.widget--readonly .checklist__add,
+.widget--readonly .data-table__add,
+.widget--readonly .goal__inputs {
+  display: none !important;
+}
+.widget--readonly .metric {
+  cursor: default !important;
+}
+.widget--readonly .metric__hint {
+  display: none !important;
+}
+.widget--readonly .cal__day {
+  pointer-events: none;
+}
+.widget--readonly .cal__nav-btn {
+  /* навигация по месяцам разрешена — только просмотр */
+  pointer-events: auto;
 }

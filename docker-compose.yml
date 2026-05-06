@@ -5,6 +5,8 @@ services:
     image: mysql:8.0
     container_name: poc-db
     restart: unless-stopped
+    ports:
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: password_poc
       MYSQL_DATABASE:      poc

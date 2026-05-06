@@ -8,19 +8,41 @@
  */
 "use strict";
 
+/* ══ Access guard ═══════════════════════════════════════════ */
+
+/**
+ * Проверяет, может ли текущий пользователь редактировать.
+ * IS_EDITOR инжектируется PHP в index.php.
+ * Если нет — показывает тост и возвращает false.
+ */
+function requireEditor(action) {
+  if (typeof IS_EDITOR !== "undefined" && !IS_EDITOR) {
+    toast("У вас права только для просмотра", "err");
+    return false;
+  }
+  return true;
+}
+
 /* ══ Constants ══════════════════════════════════════════════ */
 
 // SVG icon strings for widget headers
 const SVG = {
-  metric:     '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></svg>',
-  note:       '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>',
-  checklist:  '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>',
-  goal:       '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
-  timer:      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>',
-  line_chart: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>',
-  bar_chart:  '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>',
-  table:      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>',
-  calendar:   '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>',
+  metric:
+    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></svg>',
+  note: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>',
+  checklist:
+    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>',
+  goal: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+  timer:
+    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" x2="14" y1="2" y2="2"/><line x1="12" x2="15" y1="14" y2="11"/><circle cx="12" cy="14" r="8"/></svg>',
+  line_chart:
+    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>',
+  bar_chart:
+    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>',
+  table:
+    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>',
+  calendar:
+    '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>',
 };
 const WIDGET_ICONS = SVG; // alias
 const WIDGET_LABELS = {
@@ -115,8 +137,12 @@ function toggleTheme() {
 
 function applyTheme(theme, save) {
   document.documentElement.setAttribute("data-theme", theme);
-  document.querySelectorAll('.icon--theme-moon').forEach(el => { el.style.display = theme==='dark'?'none':'inline-block'; });
-  document.querySelectorAll('.icon--theme-sun').forEach(el => { el.style.display = theme==='dark'?'inline-block':'none'; });
+  document.querySelectorAll(".icon--theme-moon").forEach((el) => {
+    el.style.display = theme === "dark" ? "none" : "inline-block";
+  });
+  document.querySelectorAll(".icon--theme-sun").forEach((el) => {
+    el.style.display = theme === "dark" ? "inline-block" : "none";
+  });
   if (save) localStorage.setItem("poc-theme", theme);
   // Redraw charts for correct grid/tick colors
   widgets
@@ -129,8 +155,29 @@ function applyTheme(theme, save) {
 
 /* ══ Nav clock ══════════════════════════════════════════════ */
 
-const DAYS_RU   = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
-const MONTHS_SHORT_RU = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+const DAYS_RU = [
+  "Воскресенье",
+  "Понедельник",
+  "Вторник",
+  "Среда",
+  "Четверг",
+  "Пятница",
+  "Суббота",
+];
+const MONTHS_SHORT_RU = [
+  "янв",
+  "фев",
+  "мар",
+  "апр",
+  "май",
+  "июн",
+  "июл",
+  "авг",
+  "сен",
+  "окт",
+  "ноя",
+  "дек",
+];
 
 function initClock() {
   tickClock();
@@ -139,10 +186,17 @@ function initClock() {
 function tickClock() {
   const d = new Date();
   // Sidebar clock
-  const timeEl = document.getElementById('sidebar-time');
-  if (timeEl) timeEl.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
-  const dateEl = document.getElementById('sidebar-date');
-  if (dateEl) dateEl.textContent = DAYS_RU[d.getDay()] + ', ' + d.getDate() + ' ' + MONTHS_SHORT_RU[d.getMonth()];
+  const timeEl = document.getElementById("sidebar-time");
+  if (timeEl)
+    timeEl.textContent = pad(d.getHours()) + ":" + pad(d.getMinutes());
+  const dateEl = document.getElementById("sidebar-date");
+  if (dateEl)
+    dateEl.textContent =
+      DAYS_RU[d.getDay()] +
+      ", " +
+      d.getDate() +
+      " " +
+      MONTHS_SHORT_RU[d.getMonth()];
 }
 
 /* ══ API ════════════════════════════════════════════════════ */
@@ -165,6 +219,7 @@ async function api(action, body = {}) {
 /* ══ Modal ══════════════════════════════════════════════════ */
 
 function openModal(type, label) {
+  if (!requireEditor()) return;
   pendingType = type;
   document.getElementById("modal-title").innerHTML =
     (WIDGET_ICONS[type] || "") + " " + label;
@@ -384,6 +439,7 @@ function extractContent(type) {
 /* ══ Add widget ═════════════════════════════════════════════ */
 
 async function confirmAdd() {
+  if (!requireEditor()) return;
   const type = pendingType;
   const title =
     document.getElementById("ftitle")?.value.trim() || WIDGET_LABELS[type];
@@ -415,7 +471,7 @@ async function confirmAdd() {
     document.getElementById("empty-state")?.remove();
     renderWidget(w);
     updateWidgetCount();
-    toast('«' + title + '» добавлен');
+    toast("«" + title + "» добавлен");
   } catch (e) {
     console.error("confirmAdd error:", e);
     toast("Ошибка: " + e.message, "err");
@@ -433,22 +489,31 @@ function renderWidget(w) {
   el.id = "w-" + w.id;
   if ((w.position_w || 1) > 1) el.classList.add("col-" + w.position_w);
   if ((w.position_h || 1) > 1) el.classList.add("row-" + w.position_h);
+  const isViewer = typeof IS_EDITOR !== "undefined" && !IS_EDITOR;
+  if (isViewer) el.classList.add("widget--readonly");
   el.innerHTML = `
         <div class="widget__bar widget__bar--${BAR_COLORS[w.type] || "amber"}"></div>
-        <div class="widget__head" id="wh-${w.id}" title="Перетащите для перемещения">
+        <div class="widget__head" id="wh-${w.id}" title="${isViewer ? "Только просмотр" : "Перетащите для перемещения"}">
             <span class="widget__icon">${WIDGET_ICONS[w.type] || "▪"}</span>
-            <span class="widget__title" id="wt-${w.id}" contenteditable="true"
-                  onblur="onTitleBlur(${w.id},this.textContent)"
-                  onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
+            <span class="widget__title" id="wt-${w.id}" ${isViewer ? "" : 'contenteditable="true"'}
+                  ${isViewer ? "" : `onblur="onTitleBlur(${w.id},this.textContent)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"`}
             >${esc(w.title)}</span>
             <span class="widget__save-dot" id="dot-${w.id}"></span>
-            <button class="widget__action widget__action--delete" data-nodrag="1"
-                    onclick="deleteWidget(${w.id})" title="Удалить">✕</button>
+            ${
+              isViewer
+                ? ""
+                : `<button class="widget__action widget__action--delete" data-nodrag="1"
+                    onclick="deleteWidget(${w.id})" title="Удалить">✕</button>`
+            }
         </div>
         <div class="widget__body" id="wb-${w.id}"></div>
-        <div class="resize-handle-s"  id="rhs-${w.id}"></div>
+        ${
+          isViewer
+            ? ""
+            : `<div class="resize-handle-s"  id="rhs-${w.id}"></div>
         <div class="resize-handle-e"  id="rhe-${w.id}"></div>
-        <div class="resize-handle-se" id="rhse-${w.id}"></div>`;
+        <div class="resize-handle-se" id="rhse-${w.id}"></div>`
+        }`;
   const grid = document.getElementById("muuri-grid");
   if (!grid) {
     console.error(
@@ -466,6 +531,7 @@ function renderWidget(w) {
 /* ══ Drag & Drop ════════════════════════════════════════════ */
 
 function bindDragEvents(el, wid) {
+  if (typeof IS_EDITOR !== "undefined" && !IS_EDITOR) return;
   const head = el.querySelector(".widget__head");
   if (!head) return;
 
@@ -544,6 +610,7 @@ function bindDragEvents(el, wid) {
 }
 
 async function saveOrder() {
+  if (typeof IS_EDITOR !== "undefined" && !IS_EDITOR) return;
   const order = [...document.querySelectorAll('.widget[id^="w-"]')].map(
     (el, i) => ({ id: parseInt(el.id.replace("w-", "")), sort_order: i }),
   );
@@ -560,6 +627,7 @@ async function saveOrder() {
 /* ══ Resize handles ─────────────────────────────────────── */
 
 function bindResizeHandles(el, wid) {
+  if (typeof IS_EDITOR !== "undefined" && !IS_EDITOR) return;
   // SE = both axes
   const hSE = el.querySelector(".resize-handle-se");
   // S  = height only
@@ -685,6 +753,7 @@ function buildMetric(wid, c) {
         <div class="metric__hint">нажмите для изменения</div></div>`;
 }
 function openMetricEdit(wid) {
+  if (!requireEditor()) return;
   const w = widgets.find((x) => x.id === wid);
   if (!w) return;
   const c = w.content || {},
@@ -707,6 +776,7 @@ function openMetricEdit(wid) {
   document.getElementById("me-val-" + wid)?.focus();
 }
 function applyMetricEdit(wid) {
+  if (!requireEditor()) return;
   const w = widgets.find((x) => x.id === wid);
   if (!w) return;
   const t = parseFloat(document.getElementById("me-trn-" + wid)?.value || 0);
@@ -729,6 +799,7 @@ function buildNote(wid, c) {
         oninput="onNoteInput(${wid},this.value)">${esc(c.text || "")}</textarea>`;
 }
 function onNoteInput(wid, text) {
+  if (!requireEditor()) return;
   const w = widgets.find((x) => x.id === wid);
   if (w) w.content = { ...(w.content || {}), text };
   scheduleAutoSave(wid);
@@ -756,6 +827,7 @@ function buildChecklist(wid, c) {
         </div>${items.length ? `<div class="checklist__footer">Выполнено: ${done} / ${items.length}</div>` : ""}</div>`;
 }
 function toggleCheckItem(wid, itemId) {
+  if (!requireEditor()) return;
   const w = widgets.find((x) => x.id === wid),
     item = w?.content?.items?.find((i) => i.id === itemId);
   if (!item) return;
@@ -764,6 +836,7 @@ function toggleCheckItem(wid, itemId) {
   scheduleAutoSave(wid);
 }
 function onCheckItemInput(wid, itemId, text) {
+  if (!requireEditor()) return;
   const w = widgets.find((x) => x.id === wid),
     item = w?.content?.items?.find((i) => i.id === itemId);
   if (item) {
@@ -772,6 +845,7 @@ function onCheckItemInput(wid, itemId, text) {
   }
 }
 function addCheckItem(wid) {
+  if (!requireEditor()) return;
   const w = widgets.find((x) => x.id === wid);
   if (!w) return;
   if (!w.content.items) w.content.items = [];
@@ -787,6 +861,7 @@ function addCheckItem(wid) {
   scheduleAutoSave(wid);
 }
 function deleteCheckItem(wid, itemId) {
+  if (!requireEditor()) return;
   const w = widgets.find((x) => x.id === wid);
   if (!w) return;
   w.content.items = (w.content.items || []).filter((i) => i.id !== itemId);
@@ -822,6 +897,7 @@ function buildGoal(wid, c) {
         </div></div>`;
 }
 function onGoalChange(wid, field, val) {
+  if (!requireEditor()) return;
   const w = widgets.find((x) => x.id === wid);
   if (!w) return;
   w.content[field] = parseFloat(val) || 0;
@@ -867,7 +943,9 @@ function toggleTimer(wid) {
     clearInterval(window[key]);
     window[key] = null;
     const btn = document.getElementById("tp-" + wid);
-    if (btn) btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 3 20 12 6 21 6 3"/></svg> Продолжить';
+    if (btn)
+      btn.innerHTML =
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 3 20 12 6 21 6 3"/></svg> Продолжить';
     document
       .getElementById("td-" + wid)
       ?.classList.remove("timer__display--running");
@@ -876,7 +954,9 @@ function toggleTimer(wid) {
       .getElementById("td-" + wid)
       ?.classList.add("timer__display--running");
     const btn = document.getElementById("tp-" + wid);
-    if (btn) btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="4" height="16" x="6" y="4"/><rect width="4" height="16" x="14" y="4"/></svg> Пауза';
+    if (btn)
+      btn.innerHTML =
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="4" height="16" x="6" y="4"/><rect width="4" height="16" x="14" y="4"/></svg> Пауза';
     const mode = w.content.mode;
     window[key] = setInterval(() => {
       if (mode === "countdown") {
@@ -1012,12 +1092,14 @@ function buildTable(wid, c) {
   return `<div class="data-table-wrap"><table class="data-table"><thead><tr>${ths}<th style="width:30px"></th></tr></thead><tbody>${trs}</tbody></table><button class="data-table__add" onclick="addTableRow(${wid})">+ Добавить строку</button></div>`;
 }
 function onCellBlur(wid, ri, ci, val) {
+  if (!requireEditor()) return;
   const w = widgets.find((x) => x.id === wid);
   if (!w || !w.content.rows[ri]) return;
   w.content.rows[ri][ci] = val.trim();
   scheduleAutoSave(wid);
 }
 function addTableRow(wid) {
+  if (!requireEditor()) return;
   const w = widgets.find((x) => x.id === wid);
   if (!w) return;
   w.content.rows.push(
@@ -1027,6 +1109,7 @@ function addTableRow(wid) {
   scheduleAutoSave(wid);
 }
 function deleteTableRow(wid, ri) {
+  if (!requireEditor()) return;
   const w = widgets.find((x) => x.id === wid);
   if (!w) return;
   w.content.rows.splice(ri, 1);
@@ -1139,6 +1222,10 @@ function closeCalPopover() {
   if (old) old.remove();
 }
 function saveCalPopover(wid, key) {
+  if (!requireEditor()) {
+    closeCalPopover();
+    return;
+  }
   const w = widgets.find((x) => x.id === wid),
     pop = document.getElementById("cal-pop");
   if (!w || !pop) return;
@@ -1152,6 +1239,7 @@ function saveCalPopover(wid, key) {
 }
 function toggleCalCross(e, wid, key) {
   e.preventDefault();
+  if (!requireEditor()) return;
   const w = widgets.find((x) => x.id === wid);
   if (!w) return;
   if (!w.content.crossed) w.content.crossed = {};
@@ -1162,6 +1250,7 @@ function toggleCalCross(e, wid, key) {
   scheduleAutoSave(wid);
 }
 function toggleCalCrossFromPop(wid, key) {
+  if (!requireEditor()) return;
   const w = widgets.find((x) => x.id === wid);
   if (!w) return;
   if (!w.content.crossed) w.content.crossed = {};
@@ -1215,6 +1304,10 @@ function showAutosaveStatus() {
 /* ══ Title edit ═════════════════════════════════════════════ */
 
 function onTitleBlur(wid, text) {
+  if (!requireEditor()) {
+    rerenderContent(wid);
+    return;
+  }
   const w = widgets.find((x) => x.id === wid);
   if (!w) return;
   w.title = text.trim() || w.title;
@@ -1224,6 +1317,7 @@ function onTitleBlur(wid, text) {
 /* ══ Delete ═════════════════════════════════════════════════ */
 
 async function deleteWidget(wid) {
+  if (!requireEditor()) return;
   if (!confirm("Удалить виджет?")) return;
   try {
     await api("delete_widget", { id: wid });
@@ -1252,6 +1346,7 @@ async function deleteWidget(wid) {
 }
 
 async function clearAllWidgets() {
+  if (!requireEditor()) return;
   if (!widgets.length) return;
   if (!confirm("Удалить все виджеты? Это действие нельзя отменить.")) return;
   // Stop all timers, destroy charts
