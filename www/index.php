@@ -164,6 +164,7 @@ layout_start('Дашборд');
 
     <div class="nav-spacer"></div>
 
+    <!-- Уведомления -->
     <div class="notif-bell" id="notif-bell">
       <button class="notif-bell__btn" id="notif-btn" onclick="toggleNotifPanel()" title="Уведомления">
         <?= icon('bell', '', 18) ?>
@@ -179,6 +180,7 @@ layout_start('Дашборд');
         </div>
       </div>
     </div>
+
     <a href="/settings.php" class="nav-user" title="Настройки профиля">
       <?= icon('user', '', 14) ?> <?= htmlspecialchars($user['username']) ?>
     </a>

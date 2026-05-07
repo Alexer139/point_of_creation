@@ -30,7 +30,7 @@ function get_dashboard_role(int $dashboard_id, int $user_id): ?string
     if (!$row) {
         return null; // дашборд не существует
     }
-    if ((int)$row['owner_id'] === $user_id) {
+    if ((int) $row['owner_id'] === $user_id) {
         return 'owner';
     }
 
@@ -78,7 +78,7 @@ function get_dashboard_id_by_page(int $page_id): ?int
     $stmt = get_db()->prepare("SELECT `dashboard_id` FROM `pages` WHERE `id` = ?");
     $stmt->execute([$page_id]);
     $row = $stmt->fetch();
-    return $row ? (int)$row['dashboard_id'] : null;
+    return $row ? (int) $row['dashboard_id'] : null;
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -94,7 +94,7 @@ function get_dashboard_id_by_widget(int $widget_id): ?int
     ");
     $stmt->execute([$widget_id]);
     $row = $stmt->fetch();
-    return $row ? (int)$row['dashboard_id'] : null;
+    return $row ? (int) $row['dashboard_id'] : null;
 }
 
 // ──────────────────────────────────────────────────────────────

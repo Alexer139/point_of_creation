@@ -22,7 +22,6 @@ function layout_start(string $title = 'Dashboard', array $opts = []): void
       rel="stylesheet">
     <link rel="stylesheet" href="/public/css/app.css">
     <link rel="stylesheet" href="/public/css/dashboard-additions.css">
-
     <link rel="stylesheet" href="/public/css/notifications.css">
     <script>
       (function () {
@@ -51,23 +50,21 @@ function layout_end(array $scripts = []): void
   endif;
   ?>
 
+    <script>
+      function toggleTheme() {
+        var t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+        localStorage.setItem('poc-theme', t);
+        document.querySelectorAll('.icon--theme-moon').forEach(function (el) { el.style.display = t === 'dark' ? 'none' : 'inline-block'; });
+        document.querySelectorAll('.icon--theme-sun').forEach(function (el) { el.style.display = t === 'dark' ? 'inline-block' : 'none'; });
+      }
+      function applyThemeIcons(t) {
+        document.querySelectorAll('.icon--theme-moon').forEach(function (el) { el.style.display = t === 'dark' ? 'none' : 'inline-block'; });
+        document.querySelectorAll('.icon--theme-sun').forEach(function (el) { el.style.display = t === 'dark' ? 'inline-block' : 'none'; });
+      }
+      (function () { applyThemeIcons(document.documentElement.getAttribute('data-theme') || 'light'); })();
+    </script>
     <?php if (is_logged_in()): ?>
-      <!-- ══ Уведомления ════════════════════════════════════════════ -->
-      <div class="notif-bell" id="notif-bell">
-        <button class="notif-bell__btn" id="notif-btn" onclick="toggleNotifPanel()" title="Уведомления">
-          <?= icon('bell', '', 18) ?>
-          <span class="notif-bell__badge" id="notif-badge" style="display:none">0</span>
-        </button>
-        <div class="notif-panel" id="notif-panel">
-          <div class="notif-panel__head">
-            <span class="notif-panel__title"><?= icon('bell', '', 15) ?> Уведомления</span>
-            <button class="notif-panel__read-all" onclick="markAllRead()">Прочитать все</button>
-          </div>
-          <div class="notif-list" id="notif-list">
-            <div class="notif-empty">Загрузка...</div>
-          </div>
-        </div>
-      </div>
       <script src="/public/js/notifications.js"></script>
     <?php endif; ?>
   </body>

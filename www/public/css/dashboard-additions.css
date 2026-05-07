@@ -453,3 +453,13 @@
   /* навигация по месяцам разрешена — только просмотр */
   pointer-events: auto;
 }
+
+/* ── Активная кнопка в navbar ───────────────────────────────── */
+.btn--ghost-active {
+  background: var(--surface-3);
+  color: var(--text-1);
+}
+.btn--admin-active {
+  opacity: 1;
+  box-shadow: 0 0 0 2px var(--accent);
+}

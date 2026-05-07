@@ -18,18 +18,18 @@ function get_db(): PDO
         return $pdo;
     }
 
-    $host = getenv('DB_HOST')     ?: getenv('MYSQLHOST')     ?: '127.0.0.1';
-    $port = getenv('DB_PORT')     ?: getenv('MYSQLPORT')     ?: '3306';
-    $name = getenv('DB_NAME')     ?: getenv('MYSQLDATABASE') ?: 'poc';
-    $user = getenv('DB_USER')     ?: getenv('MYSQLUSER')     ?: 'poc';
+    $host = getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: '127.0.0.1';
+    $port = getenv('DB_PORT') ?: getenv('MYSQLPORT') ?: '3306';
+    $name = getenv('DB_NAME') ?: getenv('MYSQLDATABASE') ?: 'poc';
+    $user = getenv('DB_USER') ?: getenv('MYSQLUSER') ?: 'poc';
     $pass = getenv('DB_PASSWORD') ?: getenv('MYSQLPASSWORD') ?: '';
 
     $dsn = "mysql:host={$host};port={$port};dbname={$name};charset=utf8mb4";
 
     $pdo = new PDO($dsn, $user, $pass, [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES   => false,
+        PDO::ATTR_EMULATE_PREPARES => false,
     ]);
 
     // Синхронизировать timezone MySQL с PHP (оба в UTC)

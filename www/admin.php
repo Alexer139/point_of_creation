@@ -87,19 +87,8 @@ $flash = $flash_map[$_GET['msg'] ?? ''] ?? '';
 layout_start('Администратор', ['body_class' => 'admin-page']);
 ?>
 
-<nav class="navbar">
-  <a href="/" class="logo">
-    <div class="logo__mark"><?= icon('sparkles', '', 16) ?></div>
-    <span class="logo__text">Point of <em>Creation</em></span>
-  </a>
-  <span class="btn btn--admin" style="cursor:default"><?= icon('settings', '', 15) ?> Панель администратора</span>
-  <div class="nav-spacer"></div>
-  <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Сменить тему">
-    <?= icon('moon', 'icon--theme-moon', 16) ?><?= icon('sun', 'icon--theme-sun', 16) ?>
-  </button>
-  <a href="/" class="btn btn--ghost"><?= icon('arrow-left', '', 14) ?> Дашборд</a>
-  <a href="/logout.php" class="btn btn--danger"><?= icon('log-out', '', 14) ?> Выйти</a>
-</nav>
+<?php $navbar_active = 'admin';
+require __DIR__ . '/templates/navbar.php'; ?>
 
 <div class="admin-content">
 
@@ -247,7 +236,8 @@ layout_start('Администратор', ['body_class' => 'admin-page']);
                   <div class="user-avatar user-avatar--muted"><?= strtoupper(mb_substr($u['username'], 0, 1)) ?></div>
                   <div>
                     <div style="font-weight:600;color:var(--text);text-decoration:line-through">
-                      <?= htmlspecialchars($u['username']) ?></div>
+                      <?= htmlspecialchars($u['username']) ?>
+                    </div>
                     <div style="font-size:.7rem;color:#ef4444;font-weight:600">деактивирован</div>
                   </div>
                 </div>
@@ -361,31 +351,22 @@ layout_start('Администратор', ['body_class' => 'admin-page']);
   }
 </style>
 
-<script>
-  function toggleTheme() {
-    var t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', t);
-    localStorage.setItem('poc-theme', t);
-    document.querySelectorAll('.icon--theme-moon').forEach(function (el) { el.style.display = t === 'dark' ? 'none' : 'inline-block'; });
-    document.querySelectorAll('.icon--theme-sun').forEach(function (el) { el.style.display = t === 'dark' ? 'inline-block' : 'none'; });
-  }
-  (function () {
-    var t = document.documentElement.getAttribute('data-theme') || 'light';
-    document.querySelectorAll('.icon--theme-moon').forEach(function (el) { el.style.display = t === 'dark' ? 'none' : 'inline-block'; });
-    document.querySelectorAll('.icon--theme-sun').forEach(function (el) { el.style.display = t === 'dark' ? 'inline-block' : 'none'; });
-  })();
 
-  // Форматировать все даты из UTC в локальный timezone браузера
-  document.querySelectorAll('.fmt-date').forEach(function (el) {
-    var utc = el.getAttribute('data-utc');
-    if (!utc) return;
-    var d = new Date(utc.replace(' ', 'T') + 'Z');
-    el.textContent = d.toLocaleString('ru-RU', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.fmt-date').forEach(function (el) {
+      var utc = el.getAttribute('data-utc');
+      if (!utc) return;
+      var d = new Date(utc.replace(' ', 'T') + 'Z');
+      el.textContent = d.toLocaleString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
     });
   });
 </script>

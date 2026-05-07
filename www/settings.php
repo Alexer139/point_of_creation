@@ -5,108 +5,108 @@ require_once __DIR__ . '/templates/layout.php';
 require_auth();
 
 $user = current_user();
-$db   = get_db();
+$db = get_db();
 
-$errors  = [];
+$errors = [];
 $success = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!verify_csrf($_POST['csrf'] ?? '')) {
-        $errors[] = 'Неверный CSRF-токен. Обновите страницу.';
-    } else {
-        $action = $_POST['action'] ?? '';
+  if (!verify_csrf($_POST['csrf'] ?? '')) {
+    $errors[] = 'Неверный CSRF-токен. Обновите страницу.';
+  } else {
+    $action = $_POST['action'] ?? '';
 
-        if ($action === 'change_username') {
-            $new = trim($_POST['username'] ?? '');
-            if (strlen($new) < 3 || strlen($new) > 32) {
-                $errors[] = 'Имя пользователя: от 3 до 32 символов.';
-            } elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $new)) {
-                $errors[] = 'Имя пользователя: только латиница, цифры и _.';
-            } else {
-                $stmt = $db->prepare('SELECT id FROM users WHERE username = ? AND id != ?');
-                $stmt->execute([$new, $user['id']]);
-                if ($stmt->fetch()) {
-                    $errors[] = 'Это имя уже занято другим пользователем.';
-                } else {
-                    $db->prepare('UPDATE users SET username = ? WHERE id = ?')
-                       ->execute([$new, $user['id']]);
-                    $_SESSION['user']['username'] = $new;
-                    $user = current_user();
-                    $success[] = 'Имя пользователя успешно изменено.';
-                }
-            }
+    if ($action === 'change_username') {
+      $new = trim($_POST['username'] ?? '');
+      if (strlen($new) < 3 || strlen($new) > 32) {
+        $errors[] = 'Имя пользователя: от 3 до 32 символов.';
+      } elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $new)) {
+        $errors[] = 'Имя пользователя: только латиница, цифры и _.';
+      } else {
+        $stmt = $db->prepare('SELECT id FROM users WHERE username = ? AND id != ?');
+        $stmt->execute([$new, $user['id']]);
+        if ($stmt->fetch()) {
+          $errors[] = 'Это имя уже занято другим пользователем.';
+        } else {
+          $db->prepare('UPDATE users SET username = ? WHERE id = ?')
+            ->execute([$new, $user['id']]);
+          $_SESSION['user']['username'] = $new;
+          $user = current_user();
+          $success[] = 'Имя пользователя успешно изменено.';
         }
-
-        if ($action === 'change_email') {
-            $new_email = trim($_POST['email'] ?? '');
-            $pass      = $_POST['confirm_password_email'] ?? '';
-
-            if (!filter_var($new_email, FILTER_VALIDATE_EMAIL)) {
-                $errors[] = 'Некорректный email-адрес.';
-            } else {
-                $stmt = $db->prepare('SELECT password_hash FROM users WHERE id = ?');
-                $stmt->execute([$user['id']]);
-                $row = $stmt->fetch();
-                if (!$row || !password_verify($pass, $row['password_hash'])) {
-                    $errors[] = 'Неверный пароль. Email не изменён.';
-                } else {
-                    $stmt = $db->prepare('SELECT id FROM users WHERE email = ? AND id != ?');
-                    $stmt->execute([$new_email, $user['id']]);
-                    if ($stmt->fetch()) {
-                        $errors[] = 'Этот email уже используется другим аккаунтом.';
-                    } else {
-                        $db->prepare('UPDATE users SET email = ? WHERE id = ?')
-                           ->execute([$new_email, $user['id']]);
-                        $_SESSION['user']['email'] = $new_email;
-                        $user = current_user();
-                        $success[] = 'Email успешно изменён.';
-                    }
-                }
-            }
-        }
-
-        if ($action === 'change_password') {
-            $current = $_POST['current_password'] ?? '';
-            $new     = $_POST['new_password']     ?? '';
-            $confirm = $_POST['confirm_password'] ?? '';
-
-            // ИСПРАВЛЕНО: password → password_hash
-            $stmt = $db->prepare('SELECT password_hash FROM users WHERE id = ?');
-            $stmt->execute([$user['id']]);
-            $row = $stmt->fetch();
-
-            if (!$row || !password_verify($current, $row['password_hash'])) {
-                $errors[] = 'Текущий пароль введён неверно.';
-            } elseif (strlen($new) < 6) {
-                $errors[] = 'Новый пароль: минимум 6 символов.';
-            } elseif ($new !== $confirm) {
-                $errors[] = 'Новый пароль и подтверждение не совпадают.';
-            } else {
-                // ИСПРАВЛЕНО: password → password_hash
-                $db->prepare('UPDATE users SET password_hash = ? WHERE id = ?')
-                   ->execute([password_hash($new, PASSWORD_DEFAULT), $user['id']]);
-                $success[] = 'Пароль успешно изменён.';
-            }
-        }
-
-        if ($action === 'delete_account') {
-            $pass = $_POST['confirm_password_delete'] ?? '';
-
-            // ИСПРАВЛЕНО: password → password_hash
-            $stmt = $db->prepare('SELECT password_hash FROM users WHERE id = ?');
-            $stmt->execute([$user['id']]);
-            $row = $stmt->fetch();
-
-            if (!$row || !password_verify($pass, $row['password_hash'])) {
-                $errors[] = 'Неверный пароль. Аккаунт не удалён.';
-            } else {
-                $db->prepare('DELETE FROM users WHERE id = ?')->execute([$user['id']]);
-                session_destroy();
-                header('Location: /login.php');
-                exit;
-            }
-        }
+      }
     }
+
+    if ($action === 'change_email') {
+      $new_email = trim($_POST['email'] ?? '');
+      $pass = $_POST['confirm_password_email'] ?? '';
+
+      if (!filter_var($new_email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'Некорректный email-адрес.';
+      } else {
+        $stmt = $db->prepare('SELECT password_hash FROM users WHERE id = ?');
+        $stmt->execute([$user['id']]);
+        $row = $stmt->fetch();
+        if (!$row || !password_verify($pass, $row['password_hash'])) {
+          $errors[] = 'Неверный пароль. Email не изменён.';
+        } else {
+          $stmt = $db->prepare('SELECT id FROM users WHERE email = ? AND id != ?');
+          $stmt->execute([$new_email, $user['id']]);
+          if ($stmt->fetch()) {
+            $errors[] = 'Этот email уже используется другим аккаунтом.';
+          } else {
+            $db->prepare('UPDATE users SET email = ? WHERE id = ?')
+              ->execute([$new_email, $user['id']]);
+            $_SESSION['user']['email'] = $new_email;
+            $user = current_user();
+            $success[] = 'Email успешно изменён.';
+          }
+        }
+      }
+    }
+
+    if ($action === 'change_password') {
+      $current = $_POST['current_password'] ?? '';
+      $new = $_POST['new_password'] ?? '';
+      $confirm = $_POST['confirm_password'] ?? '';
+
+      // ИСПРАВЛЕНО: password → password_hash
+      $stmt = $db->prepare('SELECT password_hash FROM users WHERE id = ?');
+      $stmt->execute([$user['id']]);
+      $row = $stmt->fetch();
+
+      if (!$row || !password_verify($current, $row['password_hash'])) {
+        $errors[] = 'Текущий пароль введён неверно.';
+      } elseif (strlen($new) < 6) {
+        $errors[] = 'Новый пароль: минимум 6 символов.';
+      } elseif ($new !== $confirm) {
+        $errors[] = 'Новый пароль и подтверждение не совпадают.';
+      } else {
+        // ИСПРАВЛЕНО: password → password_hash
+        $db->prepare('UPDATE users SET password_hash = ? WHERE id = ?')
+          ->execute([password_hash($new, PASSWORD_DEFAULT), $user['id']]);
+        $success[] = 'Пароль успешно изменён.';
+      }
+    }
+
+    if ($action === 'delete_account') {
+      $pass = $_POST['confirm_password_delete'] ?? '';
+
+      // ИСПРАВЛЕНО: password → password_hash
+      $stmt = $db->prepare('SELECT password_hash FROM users WHERE id = ?');
+      $stmt->execute([$user['id']]);
+      $row = $stmt->fetch();
+
+      if (!$row || !password_verify($pass, $row['password_hash'])) {
+        $errors[] = 'Неверный пароль. Аккаунт не удалён.';
+      } else {
+        $db->prepare('DELETE FROM users WHERE id = ?')->execute([$user['id']]);
+        session_destroy();
+        header('Location: /login.php');
+        exit;
+      }
+    }
+  }
 }
 
 // ИСПРАВЛЕНО: виджеты теперь привязаны к страницам → дашбордам → владельцу
@@ -128,28 +128,12 @@ $urow = $stmt2->fetch();
 layout_start('Настройки', ['body_class' => 'settings-page']);
 ?>
 
-<nav class="navbar">
-  <a href="/" class="logo">
-    <div class="logo__mark"><?= icon('sparkles', '', 16) ?></div>
-    <span class="logo__text">Point of <em>Creation</em></span>
-  </a>
-  <div class="nav-spacer"></div>
-  <a href="/settings.php" class="nav-user nav-user--active" title="Настройки профиля">
-    <?= icon('user', '', 14) ?> <?= htmlspecialchars($user['username']) ?>
-  </a>
-  <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Сменить тему">
-    <?= icon('moon', 'icon--theme-moon', 16) ?><?= icon('sun', 'icon--theme-sun', 16) ?>
-  </button>
-  <a href="/" class="btn btn--ghost">← Дашборд</a>
-  <?php if (is_admin()): ?>
-    <a href="/admin.php" class="btn btn--admin"><?= icon('settings', '', 14) ?> Admin</a>
-  <?php endif; ?>
-  <a href="/logout.php" class="btn btn--danger"><?= icon('log-out', '', 14) ?> Выйти</a>
-</nav>
+<?php $navbar_active = 'settings';
+require __DIR__ . '/templates/navbar.php'; ?>
 
 <div class="settings-center">
 
-  <?php foreach ($errors  as $e): ?>
+  <?php foreach ($errors as $e): ?>
     <div class="settings-alert settings-alert--err">✕ <?= htmlspecialchars($e) ?></div>
   <?php endforeach; ?>
   <?php foreach ($success as $s): ?>
@@ -170,8 +154,8 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
         <div class="s-avatar__name"><?= htmlspecialchars($user['username']) ?></div>
         <div class="s-avatar__role">
           <?= $user['role'] === 'admin'
-              ? icon('star','',13).' Администратор'
-              : icon('user','',13).' Пользователь' ?>
+            ? icon('star', '', 13) . ' Администратор'
+            : icon('user', '', 13) . ' Пользователь' ?>
         </div>
         <?php if ($urow): ?>
           <div class="s-avatar__since">С нами с <?= date('d.m.Y', strtotime($urow['created_at'])) ?></div>
@@ -179,44 +163,42 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
       </div>
     </div>
     <form method="post">
-      <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
+      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
       <input type="hidden" name="action" value="change_username">
       <div class="field">
         <label class="field__label">Имя пользователя</label>
-        <input class="input" type="text" name="username"
-               value="<?= htmlspecialchars($user['username']) ?>"
-               minlength="3" maxlength="32" required autocomplete="username">
+        <input class="input" type="text" name="username" value="<?= htmlspecialchars($user['username']) ?>"
+          minlength="3" maxlength="32" required autocomplete="username">
         <div class="field__hint">Только a–z, 0–9 и _. От 3 до 32 символов.</div>
       </div>
-      <button class="btn btn--warm" type="submit"><?= icon('save','',14) ?> Сохранить имя</button>
-      </form>
+      <button class="btn btn--warm" type="submit"><?= icon('save', '', 14) ?> Сохранить имя</button>
+    </form>
 
-      <hr style="border:none;border-top:1px solid var(--border);margin:1.5rem 0">
+    <hr style="border:none;border-top:1px solid var(--border);margin:1.5rem 0">
 
-      <div class="scard__head" style="margin-bottom:1rem">
-        <div class="scard__icon"><?= icon('mail', '', 20) ?></div>
-        <div>
-          <div class="scard__title">Email</div>
-          <div class="scard__sub">Используется для приглашений в дашборды</div>
-        </div>
+    <div class="scard__head" style="margin-bottom:1rem">
+      <div class="scard__icon"><?= icon('mail', '', 20) ?></div>
+      <div>
+        <div class="scard__title">Email</div>
+        <div class="scard__sub">Используется для приглашений в дашборды</div>
       </div>
-      <form method="post">
-        <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
-        <input type="hidden" name="action" value="change_email">
-        <div class="field">
-          <label class="field__label">Новый email</label>
-          <input class="input" type="email" name="email"
-                 value="<?= htmlspecialchars($user['email'] ?? '') ?>"
-                 placeholder="you@example.com" required autocomplete="email">
-        </div>
-        <div class="field">
-          <label class="field__label">Подтвердите паролем</label>
-          <input class="input" type="password" name="confirm_password_email"
-                 placeholder="Ваш текущий пароль" required autocomplete="current-password">
-        </div>
-        <button class="btn btn--warm" type="submit"><?= icon('save','',14) ?> Сохранить email</button>
-      </form>
-    </section>
+    </div>
+    <form method="post">
+      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
+      <input type="hidden" name="action" value="change_email">
+      <div class="field">
+        <label class="field__label">Новый email</label>
+        <input class="input" type="email" name="email" value="<?= htmlspecialchars($user['email'] ?? '') ?>"
+          placeholder="you@example.com" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label class="field__label">Подтвердите паролем</label>
+        <input class="input" type="password" name="confirm_password_email" placeholder="Ваш текущий пароль" required
+          autocomplete="current-password">
+      </div>
+      <button class="btn btn--warm" type="submit"><?= icon('save', '', 14) ?> Сохранить email</button>
+    </form>
+  </section>
 
   <section class="scard" id="password">
     <div class="scard__head">
@@ -227,24 +209,24 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
       </div>
     </div>
     <form method="post">
-      <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
+      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
       <input type="hidden" name="action" value="change_password">
       <div class="field">
         <label class="field__label">Текущий пароль</label>
-        <input class="input" type="password" name="current_password" required
-               autocomplete="current-password" placeholder="••••••">
+        <input class="input" type="password" name="current_password" required autocomplete="current-password"
+          placeholder="••••••">
       </div>
       <div class="field">
         <label class="field__label">Новый пароль</label>
-        <input class="input" type="password" name="new_password" required
-               minlength="6" autocomplete="new-password" placeholder="Минимум 6 символов">
+        <input class="input" type="password" name="new_password" required minlength="6" autocomplete="new-password"
+          placeholder="Минимум 6 символов">
       </div>
       <div class="field">
         <label class="field__label">Подтверждение нового пароля</label>
-        <input class="input" type="password" name="confirm_password" required
-               minlength="6" autocomplete="new-password" placeholder="Повторите пароль">
+        <input class="input" type="password" name="confirm_password" required minlength="6" autocomplete="new-password"
+          placeholder="Повторите пароль">
       </div>
-      <button class="btn btn--warm" type="submit"><?= icon('lock','',14) ?> Изменить пароль</button>
+      <button class="btn btn--warm" type="submit"><?= icon('lock', '', 14) ?> Изменить пароль</button>
     </form>
   </section>
 
@@ -258,7 +240,7 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
     </div>
     <div class="s-stats">
       <div class="s-stat">
-        <div class="s-stat__val"><?= (int)($wstats['cnt'] ?? 0) ?></div>
+        <div class="s-stat__val"><?= (int) ($wstats['cnt'] ?? 0) ?></div>
         <div class="s-stat__lbl">Виджетов</div>
       </div>
       <div class="s-stat">
@@ -292,24 +274,24 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
         <div class="s-danger-row__sub">Аккаунт и все данные будут удалены без возможности восстановления</div>
       </div>
       <button class="btn btn--danger" type="button"
-              onclick="document.getElementById('delete-account-form').classList.toggle('s-delete-form--open')">
-        <?= icon('trash','',14) ?> Удалить аккаунт
+        onclick="document.getElementById('delete-account-form').classList.toggle('s-delete-form--open')">
+        <?= icon('trash', '', 14) ?> Удалить аккаунт
       </button>
     </div>
 
     <form method="post" id="delete-account-form" class="s-delete-form"
-          onsubmit="return confirm('Удалить аккаунт? Это нельзя отменить.')">
-      <input type="hidden" name="csrf"   value="<?= csrf_token() ?>">
+      onsubmit="return confirm('Удалить аккаунт? Это нельзя отменить.')">
+      <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
       <input type="hidden" name="action" value="delete_account">
       <div class="field">
         <label class="field__label">Введите пароль для подтверждения</label>
-        <input class="input" type="password" name="confirm_password_delete"
-               required placeholder="Ваш текущий пароль" autocomplete="current-password">
+        <input class="input" type="password" name="confirm_password_delete" required placeholder="Ваш текущий пароль"
+          autocomplete="current-password">
       </div>
       <div style="display:flex;gap:.75rem;flex-wrap:wrap">
-        <button class="btn btn--danger" type="submit"><?= icon('trash','',14) ?> Подтвердить удаление</button>
+        <button class="btn btn--danger" type="submit"><?= icon('trash', '', 14) ?> Подтвердить удаление</button>
         <button class="btn btn--ghost" type="button"
-                onclick="document.getElementById('delete-account-form').classList.remove('s-delete-form--open')">
+          onclick="document.getElementById('delete-account-form').classList.remove('s-delete-form--open')">
           Отмена
         </button>
       </div>
@@ -334,21 +316,6 @@ layout_start('Настройки', ['body_class' => 'settings-page']);
   </div>
 </footer>
 
-<script>
-function applyThemeIcons(t){
-  document.querySelectorAll('.icon--theme-moon').forEach(function(el){ el.style.display = t==='dark'?'none':'inline-block'; });
-  document.querySelectorAll('.icon--theme-sun').forEach(function(el){ el.style.display = t==='dark'?'inline-block':'none'; });
-}
-(function(){
-  var t = document.documentElement.getAttribute('data-theme') || 'light';
-  applyThemeIcons(t);
-})();
-function toggleTheme(){
-  var t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', t);
-  localStorage.setItem('poc-theme', t);
-  applyThemeIcons(t);
-}
-</script>
+
 
 <?php layout_end(); ?>

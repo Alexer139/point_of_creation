@@ -3,26 +3,29 @@ require_once __DIR__ . '/core/auth.php';
 require_once __DIR__ . '/core/icons.php';
 require_once __DIR__ . '/templates/layout.php';
 
-if (is_logged_in()) { header('Location: /'); exit; }
+if (is_logged_in()) {
+  header('Location: /');
+  exit;
+}
 
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!verify_csrf($_POST['csrf'] ?? '')) {
-        $error = 'Ошибка безопасности. Обновите страницу.';
-    } else {
-        $result = register_user(
-            $_POST['username'] ?? '',
-            $_POST['email']    ?? '',
-            $_POST['password'] ?? ''
-        );
-        if ($result['ok']) {
-            set_flash('reg_success', 'Аккаунт создан. Добро пожаловать!');
-            header('Location: /login.php');
-            exit;
-        }
-        $error = $result['error'];
+  if (!verify_csrf($_POST['csrf'] ?? '')) {
+    $error = 'Ошибка безопасности. Обновите страницу.';
+  } else {
+    $result = register_user(
+      $_POST['username'] ?? '',
+      $_POST['email'] ?? '',
+      $_POST['password'] ?? ''
+    );
+    if ($result['ok']) {
+      set_flash('reg_success', 'Аккаунт создан. Добро пожаловать!');
+      header('Location: /login.php');
+      exit;
     }
+    $error = $result['error'];
+  }
 }
 
 layout_start('Регистрация', ['body_class' => 'auth-page']);
@@ -46,25 +49,20 @@ layout_start('Регистрация', ['body_class' => 'auth-page']);
       <div class="field">
         <label class="field__label" for="username">Логин</label>
         <input class="input" type="text" id="username" name="username"
-               value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"
-               placeholder="только a–z, 0–9 и _"
-               autocomplete="username" required autofocus
-               minlength="3" maxlength="32">
+          value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" placeholder="только a–z, 0–9 и _"
+          autocomplete="username" required autofocus minlength="3" maxlength="32">
       </div>
 
       <div class="field">
         <label class="field__label" for="email">Email</label>
-        <input class="input" type="email" id="email" name="email"
-               value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
-               placeholder="you@example.com"
-               autocomplete="email" required>
+        <input class="input" type="email" id="email" name="email" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
+          placeholder="you@example.com" autocomplete="email" required>
       </div>
 
       <div class="field">
         <label class="field__label" for="password">Пароль</label>
-        <input class="input" type="password" id="password" name="password"
-               placeholder="минимум 6 символов"
-               autocomplete="new-password" required minlength="6">
+        <input class="input" type="password" id="password" name="password" placeholder="минимум 6 символов"
+          autocomplete="new-password" required minlength="6">
       </div>
 
       <div class="field" style="margin-top:1.5rem">
