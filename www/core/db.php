@@ -18,19 +18,22 @@ function get_db(): PDO
         return $pdo;
     }
 
-    $host = getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: '127.0.0.1';
-    $port = getenv('DB_PORT') ?: getenv('MYSQLPORT') ?: '3306';
-    $name = getenv('DB_NAME') ?: getenv('MYSQLDATABASE') ?: 'poc';
-    $user = getenv('DB_USER') ?: getenv('MYSQLUSER') ?: 'poc';
+    $host = getenv('DB_HOST')     ?: getenv('MYSQLHOST')     ?: '127.0.0.1';
+    $port = getenv('DB_PORT')     ?: getenv('MYSQLPORT')     ?: '3306';
+    $name = getenv('DB_NAME')     ?: getenv('MYSQLDATABASE') ?: 'poc';
+    $user = getenv('DB_USER')     ?: getenv('MYSQLUSER')     ?: 'poc';
     $pass = getenv('DB_PASSWORD') ?: getenv('MYSQLPASSWORD') ?: '';
 
     $dsn = "mysql:host={$host};port={$port};dbname={$name};charset=utf8mb4";
 
     $pdo = new PDO($dsn, $user, $pass, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES => false,
+        PDO::ATTR_EMULATE_PREPARES   => false,
     ]);
+
+    // Синхронизировать timezone MySQL с PHP (оба в UTC)
+    $pdo->exec("SET time_zone = '+00:00'");
 
     migrate($pdo);
 
@@ -147,16 +150,25 @@ function migrate(PDO $db): void
                 ")->execute(['admin', 'admin@localhost', password_hash('admin456', PASSWORD_DEFAULT)]);
             }
         },
-        '002_soft_delete' => function (PDO $db) {
-            // Добавить поле deleted_at для Soft Delete
-            $cols = $db->query("SHOW COLUMNS FROM `users` LIKE 'deleted_at'")->fetchAll();
-            if (empty($cols)) {
-                $db->exec("
-                    ALTER TABLE `users`
-                    ADD COLUMN `deleted_at` DATETIME NULL DEFAULT NULL AFTER `created_at`,
-                    ADD KEY `idx_users_deleted` (`deleted_at`)
-                ");
-            }
+
+        '003_notifications' => function (PDO $db) {
+            $db->exec("
+                CREATE TABLE IF NOT EXISTS `notifications` (
+                    `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                    `user_id`    INT UNSIGNED NOT NULL COMMENT 'Кому уведомление',
+                    `type`       ENUM('invited','role_changed','removed') NOT NULL,
+                    `dashboard_id` INT UNSIGNED NULL DEFAULT NULL,
+                    `dashboard_name` VARCHAR(120) NOT NULL DEFAULT '',
+                    `actor_name` VARCHAR(32)  NOT NULL DEFAULT '' COMMENT 'Кто выполнил действие',
+                    `role`       VARCHAR(16)  NOT NULL DEFAULT '' COMMENT 'Роль (для invited/role_changed)',
+                    `is_read`    TINYINT(1)   NOT NULL DEFAULT 0,
+                    `created_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (`id`),
+                    KEY `idx_notif_user` (`user_id`, `is_read`),
+                    CONSTRAINT `fk_notif_user`
+                        FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            ");
         },
     ];
 

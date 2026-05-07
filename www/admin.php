@@ -187,7 +187,8 @@ layout_start('Администратор', ['body_class' => 'admin-page']);
               </td>
               <td style="font-weight:600;color:var(--text2)"><?= (int) $u['dashboard_count'] ?></td>
               <td style="font-weight:700;color:var(--amber)"><?= (int) $u['widget_count'] ?></td>
-              <td style="color:var(--text2);font-size:.8125rem"><?= date('d.m.Y H:i', strtotime($u['created_at'])) ?></td>
+              <td style="color:var(--text2);font-size:.8125rem"><span class="fmt-date"
+                  data-utc="<?= htmlspecialchars($u['created_at']) ?>"></span></td>
               <td>
                 <?php if (!$isSelf): ?>
                   <form method="POST"
@@ -254,7 +255,8 @@ layout_start('Администратор', ['body_class' => 'admin-page']);
               <td style="color:var(--text3);font-size:.8125rem"><?= htmlspecialchars($u['email'] ?? '—') ?></td>
               <td style="color:var(--text3)"><?= (int) $u['dashboard_count'] ?></td>
               <td style="color:var(--text3)"><?= (int) $u['widget_count'] ?></td>
-              <td style="color:#ef4444;font-size:.8125rem"><?= date('d.m.Y H:i', strtotime($u['deleted_at'])) ?></td>
+              <td style="color:#ef4444;font-size:.8125rem"><span class="fmt-date"
+                  data-utc="<?= htmlspecialchars($u['deleted_at']) ?>"></span></td>
               <td>
                 <div style="display:flex;gap:.5rem;flex-wrap:wrap">
                   <form method="POST" onsubmit="return confirm('Восстановить пользователя?\nОн снова сможет войти.')">
@@ -372,6 +374,20 @@ layout_start('Администратор', ['body_class' => 'admin-page']);
     document.querySelectorAll('.icon--theme-moon').forEach(function (el) { el.style.display = t === 'dark' ? 'none' : 'inline-block'; });
     document.querySelectorAll('.icon--theme-sun').forEach(function (el) { el.style.display = t === 'dark' ? 'inline-block' : 'none'; });
   })();
+
+  // Форматировать все даты из UTC в локальный timezone браузера
+  document.querySelectorAll('.fmt-date').forEach(function (el) {
+    var utc = el.getAttribute('data-utc');
+    if (!utc) return;
+    var d = new Date(utc.replace(' ', 'T') + 'Z');
+    el.textContent = d.toLocaleString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  });
 </script>
 
 <?php layout_end(); ?>

@@ -12,15 +12,17 @@ RUN rm -f /etc/nginx/sites-enabled/default
 
 COPY nginx.conf /etc/nginx/sites-enabled/default
 
+# Настройки PHP
+RUN printf \
+    'upload_max_filesize=16M\npost_max_size=16M\nmemory_limit=128M\nsession.cookie_httponly=1\nexpose_php=Off\ndate.timezone=UTC\n' \
+    > /usr/local/etc/php/conf.d/app.ini
+
 WORKDIR /var/www/html
 
-# Убедитесь, что папка www лежит в той же директории, что и Dockerfile
 COPY www/ .
 
 RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 80
 
-# php-fpm -D запускает PHP в фоновом режиме
-# nginx запускается в основном режиме (daemon off), чтобы контейнер не закрывался
 CMD php-fpm -D && nginx -g 'daemon off;'
