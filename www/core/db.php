@@ -18,18 +18,18 @@ function get_db(): PDO
         return $pdo;
     }
 
-    $host = getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: '127.0.0.1';
-    $port = getenv('DB_PORT') ?: getenv('MYSQLPORT') ?: '3306';
-    $name = getenv('DB_NAME') ?: getenv('MYSQLDATABASE') ?: 'poc';
-    $user = getenv('DB_USER') ?: getenv('MYSQLUSER') ?: 'poc';
+    $host = getenv('DB_HOST')     ?: getenv('MYSQLHOST')     ?: '127.0.0.1';
+    $port = getenv('DB_PORT')     ?: getenv('MYSQLPORT')     ?: '3306';
+    $name = getenv('DB_NAME')     ?: getenv('MYSQLDATABASE') ?: 'poc';
+    $user = getenv('DB_USER')     ?: getenv('MYSQLUSER')     ?: 'poc';
     $pass = getenv('DB_PASSWORD') ?: getenv('MYSQLPASSWORD') ?: '';
 
     $dsn = "mysql:host={$host};port={$port};dbname={$name};charset=utf8mb4";
 
     $pdo = new PDO($dsn, $user, $pass, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES => false,
+        PDO::ATTR_EMULATE_PREPARES   => false,
     ]);
 
     // Синхронизировать timezone MySQL с PHP (оба в UTC)
@@ -169,6 +169,91 @@ function migrate(PDO $db): void
                         FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             ");
+        },
+
+        '004_billing' => function (PDO $db) {
+            $db->exec("CREATE TABLE IF NOT EXISTS `plans` (
+                `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `slug` VARCHAR(32) NOT NULL,
+                `name` VARCHAR(64) NOT NULL,
+                `price` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                `duration_days` INT UNSIGNED NOT NULL DEFAULT 30,
+                `max_dashboards` INT NOT NULL DEFAULT 3,
+                `max_pages` INT NOT NULL DEFAULT 5,
+                `max_members` INT NOT NULL DEFAULT 1,
+                `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+                `sort_order` TINYINT NOT NULL DEFAULT 0,
+                `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uq_plan_slug` (`slug`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+            $db->exec("INSERT IGNORE INTO `plans`
+                (`slug`,`name`,`price`,`duration_days`,`max_dashboards`,`max_pages`,`max_members`,`sort_order`)
+                VALUES
+                ('free','Free',0.00,36500,3,5,1,0),
+                ('level1','Level 1',299.00,30,5,10,5,1),
+                ('level2','Level 2',699.00,30,-1,-1,-1,2)");
+
+            $db->exec("CREATE TABLE IF NOT EXISTS `wallets` (
+                `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `user_id` INT UNSIGNED NOT NULL,
+                `balance` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+                `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uq_wallet_user` (`user_id`),
+                CONSTRAINT `fk_wallet_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+            $db->exec("CREATE TABLE IF NOT EXISTS `wallet_transactions` (
+                `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `user_id` INT UNSIGNED NOT NULL,
+                `type` ENUM('topup','charge','refund') NOT NULL,
+                `amount` DECIMAL(10,2) NOT NULL,
+                `balance_after` DECIMAL(10,2) NOT NULL,
+                `description` VARCHAR(255) NOT NULL DEFAULT '',
+                `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                KEY `idx_wt_user` (`user_id`),
+                CONSTRAINT `fk_wt_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+            $db->exec("CREATE TABLE IF NOT EXISTS `subscriptions` (
+                `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `user_id` INT UNSIGNED NOT NULL,
+                `plan_id` INT UNSIGNED NOT NULL,
+                `status` ENUM('active','expired','cancelled') NOT NULL DEFAULT 'active',
+                `started_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `expires_at` DATETIME NOT NULL,
+                `cancelled_at` DATETIME NULL DEFAULT NULL,
+                PRIMARY KEY (`id`),
+                KEY `idx_sub_user` (`user_id`,`status`),
+                CONSTRAINT `fk_sub_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+                CONSTRAINT `fk_sub_plan` FOREIGN KEY (`plan_id`) REFERENCES `plans`(`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+            $db->exec("CREATE TABLE IF NOT EXISTS `locked_entities` (
+                `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `user_id` INT UNSIGNED NOT NULL,
+                `entity_type` ENUM('dashboard') NOT NULL DEFAULT 'dashboard',
+                `entity_id` INT UNSIGNED NOT NULL,
+                `locked_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uq_locked` (`user_id`,`entity_type`,`entity_id`),
+                CONSTRAINT `fk_locked_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+            $db->exec("INSERT IGNORE INTO `wallets` (`user_id`,`balance`) SELECT `id`,0.00 FROM `users`");
+
+            $free = $db->query("SELECT `id` FROM `plans` WHERE `slug`='free' LIMIT 1")->fetch();
+            if ($free) {
+                $db->prepare("INSERT IGNORE INTO `subscriptions`
+                    (`user_id`,`plan_id`,`status`,`started_at`,`expires_at`)
+                    SELECT u.`id`,?,'active',NOW(),DATE_ADD(NOW(),INTERVAL 100 YEAR)
+                    FROM `users` u
+                    WHERE NOT EXISTS (SELECT 1 FROM `subscriptions` s WHERE s.`user_id`=u.`id`)")
+                   ->execute([$free['id']]);
+            }
         },
     ];
 
