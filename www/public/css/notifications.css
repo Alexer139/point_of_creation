@@ -16,21 +16,18 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius);
   border: 1px solid var(--border);
-  background: var(--surface-2);
-  color: var(--text-2);
+  background: var(--bg2);
+  color: var(--text2);
   cursor: pointer;
-  transition:
-    background 0.15s,
-    color 0.15s,
-    border-color 0.15s;
+  transition: background .15s, color .15s, border-color .15s;
 }
 
 .notif-bell__btn:hover {
-  background: var(--surface-3);
-  color: var(--text-1);
-  border-color: var(--accent);
+  background: var(--card);
+  color: var(--text);
+  border-color: var(--amber);
 }
 
 /* Бейдж с количеством непрочитанных */
@@ -44,23 +41,19 @@
   border-radius: 10px;
   background: #ef4444;
   color: #fff;
-  font-size: 0.68rem;
+  font-size: .68rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
-  border: 2px solid var(--surface-1);
-  animation: badge-pop 0.2s ease;
+  border: 2px solid var(--bg);
+  animation: badge-pop .2s ease;
 }
 
 @keyframes badge-pop {
-  from {
-    transform: scale(0);
-  }
-  to {
-    transform: scale(1);
-  }
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
 }
 
 /* ── Панель уведомлений ──────────────────────────────────────── */
@@ -83,18 +76,12 @@
 .notif-panel--open {
   display: flex;
   flex-direction: column;
-  animation: notif-in 0.18s ease;
+  animation: notif-in .18s ease;
 }
 
 @keyframes notif-in {
-  from {
-    opacity: 0;
-    transform: translateY(-8px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(-8px) scale(.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
 }
 
 /* Шапка панели */
@@ -108,27 +95,27 @@
 }
 
 .notif-panel__title {
-  font-size: 0.875rem;
+  font-size: .875rem;
   font-weight: 700;
-  color: var(--text-1);
+  color: var(--text);
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
 .notif-panel__read-all {
-  font-size: 0.75rem;
-  color: var(--accent);
+  font-size: .75rem;
+  color: var(--amber);
   background: none;
   border: none;
   cursor: pointer;
   padding: 2px 6px;
-  border-radius: var(--radius-sm);
-  transition: background 0.12s;
+  border-radius: 0.75rem;
+  transition: background .12s;
 }
 
 .notif-panel__read-all:hover {
-  background: var(--accent-subtle);
+  background: var(--cream);
 }
 
 /* ── Список уведомлений ──────────────────────────────────────── */
@@ -143,8 +130,8 @@
 .notif-empty {
   padding: 32px 16px;
   text-align: center;
-  color: var(--text-3);
-  font-size: 0.875rem;
+  color: var(--text3);
+  font-size: .875rem;
 }
 
 /* ── Одно уведомление ────────────────────────────────────────── */
@@ -155,10 +142,7 @@
   gap: 10px;
   padding: 12px 16px;
   border-bottom: 1px solid var(--border);
-  transition:
-    background 0.12s,
-    opacity 0.2s,
-    transform 0.2s;
+  transition: background .12s, opacity .2s, transform .2s;
   position: relative;
 }
 
@@ -167,22 +151,22 @@
 }
 
 .notif-item:hover {
-  background: var(--surface-2);
+  background: var(--bg2);
 }
 
 /* Непрочитанное — синяя полоска слева */
 .notif-item--unread {
-  background: var(--accent-subtle);
+  background: var(--cream);
 }
 
 .notif-item--unread::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
   width: 3px;
-  background: var(--accent);
+  background: var(--amber);
   border-radius: 0 2px 2px 0;
 }
 
@@ -200,14 +184,14 @@
 }
 
 .notif-item__text {
-  font-size: 0.84rem;
-  color: var(--text-1);
+  font-size: .84rem;
+  color: var(--text);
   line-height: 1.5;
 }
 
 .notif-item__time {
-  font-size: 0.74rem;
-  color: var(--text-3);
+  font-size: .74rem;
+  color: var(--text3);
   margin-top: 4px;
 }
 
@@ -219,16 +203,14 @@
   border-radius: 50%;
   border: none;
   background: transparent;
-  color: var(--text-3);
+  color: var(--text3);
   cursor: pointer;
-  font-size: 0.7rem;
+  font-size: .7rem;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition:
-    opacity 0.12s,
-    background 0.12s;
+  transition: opacity .12s, background .12s;
   margin-top: 1px;
 }
 
@@ -237,7 +219,7 @@
 }
 
 .notif-item__dismiss:hover {
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(239,68,68,.15);
   color: #ef4444;
 }
 
@@ -245,26 +227,26 @@
 
 .notif-actor {
   font-weight: 600;
-  color: var(--text-1);
+  color: var(--text);
 }
 
 .notif-role {
   display: inline-block;
   padding: 1px 6px;
   border-radius: 20px;
-  font-size: 0.75rem;
+  font-size: .75rem;
   font-weight: 600;
   font-family: monospace;
 }
 
 .notif-role--editor {
-  background: rgba(99, 102, 241, 0.15);
+  background: rgba(99,102,241,.15);
   color: #6366f1;
 }
 
 .notif-role--viewer {
-  background: var(--surface-3);
-  color: var(--text-2);
+  background: var(--card);
+  color: var(--text2);
 }
 
 /* ── Позиция в navbar ────────────────────────────────────────── */

@@ -38,6 +38,7 @@ function notifIcon(type) {
     case 'subscription_upgrade':  return '<span class="notif-icon">⬆️</span>';
     case 'subscription_downgrade':return '<span class="notif-icon">⬇️</span>';
     case 'subscription_renewed':  return '<span class="notif-icon">✅</span>';
+    case 'subscription_expired':  return '<span class="notif-icon">⏰</span>';
     default:                      return '<span class="notif-icon">🔔</span>';
   }
 }

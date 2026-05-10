@@ -177,11 +177,7 @@ async function api(action, body = {}) {
     console.error("api() non-JSON response:", text.slice(0, 300));
     throw new Error("Сервер вернул неверный ответ (код " + res.status + ")");
   }
-  // Заблокированный дашборд — показать сообщение и перейти на billing
-  if (data.locked) {
-    toast('Дашборд заморожен — обновите тариф', 'err');
-    setTimeout(() => { window.location.href = '/billing.php'; }, 1800);
-  }
+  // locked — обрабатывается на уровне UI (модал выбора дашбордов)
   // Лимит тарифа превышен — предложить апгрейд
   if (!data.ok && data.upgrade) {
     toast((data.error || 'Лимит тарифа') + '. Обновите подписку.', 'err');

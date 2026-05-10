@@ -255,6 +255,16 @@ function migrate(PDO $db): void
                    ->execute([$free['id']]);
             }
         },
+
+        '005_downgrade_resolved' => function (PDO $db) {
+            $cols = $db->query("SHOW COLUMNS FROM `subscriptions` LIKE 'downgrade_resolved'")->fetchAll();
+            if (empty($cols)) {
+                $db->exec("ALTER TABLE `subscriptions`
+                    ADD COLUMN `downgrade_resolved` TINYINT(1) NOT NULL DEFAULT 1
+                    COMMENT '0 = нужно показать выбор дашбордов, 1 = уже выбрал'");
+            }
+        },
+
     ];
 
     foreach ($migrations as $name => $fn) {

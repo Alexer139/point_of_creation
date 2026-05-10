@@ -187,7 +187,8 @@ require __DIR__ . '/templates/navbar.php'; ?>
       class="admin-tab <?= $tab === 'active' ? 'admin-tab--active' : '' ?>"><?= icon('users', '', 14) ?> Активные <span
         class="admin-tab__count"><?= $tab === 'active' ? $total : '' ?></span></a>
     <a href="/admin.php?tab=deleted"
-      class="admin-tab <?= $tab === 'deleted' ? 'admin-tab--active' : '' ?>"><?= icon('trash', '', 14) ?> Деактивированные
+      class="admin-tab <?= $tab === 'deleted' ? 'admin-tab--active' : '' ?>"><?= icon('trash', '', 14) ?>
+      Деактивированные
       <?php if ($tab === 'deleted' && $total > 0): ?><span
           class="admin-tab__count admin-tab__count--danger"><?= $total ?></span><?php endif; ?></a>
     <a href="/admin.php?tab=plans"
@@ -302,11 +303,13 @@ require __DIR__ . '/templates/navbar.php'; ?>
               <td>
                 <div style="display:flex;align-items:center;gap:.5rem">
                   <div class="user-avatar <?= $tab === 'deleted' ? 'user-avatar--muted' : '' ?>">
-                    <?= strtoupper(mb_substr($u['username'], 0, 1)) ?></div>
+                    <?= strtoupper(mb_substr($u['username'], 0, 1)) ?>
+                  </div>
                   <div>
                     <div
                       style="font-weight:600;color:var(--text);<?= $tab === 'deleted' ? 'text-decoration:line-through' : '' ?>">
-                      <?= htmlspecialchars($u['username']) ?></div>
+                      <?= htmlspecialchars($u['username']) ?>
+                    </div>
                     <?php if ($isSelf): ?>
                       <div style="font-size:.7rem;color:var(--amber);font-weight:600">это вы</div><?php endif; ?>
                     <span
@@ -319,12 +322,14 @@ require __DIR__ . '/templates/navbar.php'; ?>
                 <?php $ps = $u['plan_slug'] ?? 'free'; ?>
                 <span class="plan-badge plan-badge--<?= $ps ?>"><?= htmlspecialchars($u['plan_name'] ?? 'Free') ?></span>
               </td>
-              <td style="font-size:.8125rem;color:var(--text2)"><?= number_format((float) ($u['balance'] ?? 0), 2, '.', ',') ?> ₽
+              <td style="font-size:.8125rem;color:var(--text2)">
+                <?= number_format((float) ($u['balance'] ?? 0), 2, '.', ',') ?> ₽
               </td>
               <td style="font-weight:600;color:var(--text2)"><?= (int) $u['dashboard_count'] ?></td>
               <td style="font-weight:700;color:var(--amber)"><?= (int) $u['widget_count'] ?></td>
               <td><span class="fmt-date"
-                  data-utc="<?= htmlspecialchars($tab === 'deleted' ? ($u['deleted_at'] ?? '') : $u['created_at']) ?>"></span></td>
+                  data-utc="<?= htmlspecialchars($tab === 'deleted' ? ($u['deleted_at'] ?? '') : $u['created_at']) ?>"></span>
+              </td>
               <td>
                 <div style="display:flex;gap:.35rem;flex-wrap:wrap">
                   <?php if ($tab === 'deleted'): ?>
@@ -350,7 +355,8 @@ require __DIR__ . '/templates/navbar.php'; ?>
                       <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
                       <input type="hidden" name="admin_action" value="soft_delete">
                       <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
-                      <button class="btn btn--danger btn--xs" title="Деактивировать"><?= icon('user-minus', '', 12) ?></button>
+                      <button class="btn btn--danger btn--xs"
+                        title="Деактивировать"><?= icon('user-minus', '', 12) ?></button>
                     </form>
                   <?php else: ?>
                     <span style="font-size:.7rem;color:var(--text3)">вы</span>

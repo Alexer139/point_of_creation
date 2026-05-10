@@ -62,6 +62,9 @@ $action  = $body['action'] ?? '';
 $user_id = (int) current_user()['id'];
 $db      = get_db();
 
+// Проверить истечение подписки при каждом запросе
+try { check_and_apply_expiry($user_id); } catch (Throwable $e) {}
+
 // ────────────────────────────────────────────────────────────────
 //  Helpers
 // ────────────────────────────────────────────────────────────────
@@ -84,6 +87,17 @@ function create_notification(
             (`user_id`, `type`, `dashboard_id`, `dashboard_name`, `actor_name`, `role`)
         VALUES (?, ?, ?, ?, ?, ?)
     ")->execute([$target_user_id, $type, $dashboard_id, $dashboard_name, $actor_name, $role]);
+}
+
+function get_dashboard_owner(int $dashboard_id): ?int
+{
+    static $cache = [];
+    if (isset($cache[$dashboard_id])) return $cache[$dashboard_id];
+    $s = get_db()->prepare("SELECT `owner_id` FROM `dashboards` WHERE `id` = ?");
+    $s->execute([$dashboard_id]);
+    $row = $s->fetch();
+    $cache[$dashboard_id] = $row ? (int)$row['owner_id'] : null;
+    return $cache[$dashboard_id];
 }
 
 function clean_json(mixed $raw): string
@@ -109,14 +123,14 @@ try {
 
         case 'list_dashboards': {
             $dashboards = get_user_dashboards($user_id);
-            // Добавляем количество страниц к каждому дашборду
             foreach ($dashboards as &$d) {
-                $stmt = $db->prepare("
-                    SELECT COUNT(*) FROM `pages` WHERE `dashboard_id` = ?
-                ");
+                $stmt = $db->prepare("SELECT COUNT(*) FROM `pages` WHERE `dashboard_id` = ?");
                 $stmt->execute([$d['id']]);
                 $d['page_count'] = (int) $stmt->fetchColumn();
                 $d['id'] = (int) $d['id'];
+                // Флаг заморозки
+                try { $d['is_locked'] = (int)$d['my_role'] === 'owner' ? (int)is_dashboard_locked((int)$d['id'], $user_id) : 0; }
+                catch (Throwable $e) { $d['is_locked'] = 0; }
             }
             unset($d);
             echo json_encode(['ok' => true, 'dashboards' => $dashboards]);
@@ -230,7 +244,7 @@ try {
 
             // Проверяем права: только owner или editor могут создавать страницы
             require_dashboard_edit($dashboard_id, $user_id);
-            try { if (is_dashboard_locked($dashboard_id, $user_id)) { http_response_code(403); echo json_encode(['ok'=>false,'error'=>'Дашборд заморожен','locked'=>true]); break; } } catch(Throwable $e) {}
+            try { $o=get_dashboard_owner($dashboard_id); if($o&&is_dashboard_locked($dashboard_id,$o)){http_response_code(403);echo json_encode(['ok'=>false,'error'=>'Дашборд заморожен','locked'=>true]);break;} } catch(Throwable $e) {}
             try { $pl=can_create_page($dashboard_id,$user_id); } catch(Throwable $e) { $pl=['ok'=>true]; }
             if(!$pl['ok']){http_response_code(402);echo json_encode(['ok'=>false,'error'=>$pl['error'],'upgrade'=>true]);break;}
 
@@ -368,7 +382,7 @@ try {
                     break;
                 }
                 require_dashboard_edit($dashboard_id, $user_id);
-                try { if (is_dashboard_locked($dashboard_id, $user_id)) { http_response_code(403); echo json_encode(['ok'=>false,'error'=>'Дашборд заморожен','locked'=>true]); break; } } catch(Throwable $e) {}
+                try { $o=get_dashboard_owner($dashboard_id); if($o&&is_dashboard_locked($dashboard_id,$o)){http_response_code(403);echo json_encode(['ok'=>false,'error'=>'Дашборд заморожен','locked'=>true]);break;} } catch(Throwable $e) {}
 
                 $db->prepare("
                     UPDATE `widgets`
@@ -419,7 +433,7 @@ try {
             }
 
             require_dashboard_edit($dashboard_id, $user_id);
-            try { if (is_dashboard_locked($dashboard_id, $user_id)) { http_response_code(403); echo json_encode(['ok'=>false,'error'=>'Дашборд заморожен','locked'=>true]); break; } } catch(Throwable $e) {}
+            try { $o=get_dashboard_owner($dashboard_id); if($o&&is_dashboard_locked($dashboard_id,$o)){http_response_code(403);echo json_encode(['ok'=>false,'error'=>'Дашборд заморожен','locked'=>true]);break;} } catch(Throwable $e) {}
 
             $db->prepare("DELETE FROM `widgets` WHERE `id` = ?")->execute([$widget_id]);
 
@@ -479,7 +493,7 @@ try {
             }
 
             require_dashboard_edit($dashboard_id, $user_id);
-            try { if (is_dashboard_locked($dashboard_id, $user_id)) { http_response_code(403); echo json_encode(['ok'=>false,'error'=>'Дашборд заморожен','locked'=>true]); break; } } catch(Throwable $e) {}
+            try { $o=get_dashboard_owner($dashboard_id); if($o&&is_dashboard_locked($dashboard_id,$o)){http_response_code(403);echo json_encode(['ok'=>false,'error'=>'Дашборд заморожен','locked'=>true]);break;} } catch(Throwable $e) {}
 
             if (!is_array($incoming)) {
                 http_response_code(400);
@@ -734,9 +748,10 @@ try {
 
             require_dashboard_view($dashboard_id, $user_id);
 
-            // Проверить не заблокирован ли дашборд (downgrade)
+            // Проверить не заблокирован ли дашборд (downgrade) — проверяем по владельцу
             try {
-                if (is_dashboard_locked($dashboard_id, $user_id)) {
+                $dash_owner = get_dashboard_owner($dashboard_id);
+                if ($dash_owner && is_dashboard_locked($dashboard_id, $dash_owner)) {
                     http_response_code(403);
                     echo json_encode(['ok' => false, 'error' => 'Этот дашборд заморожен. Обновите тариф или выберите другие активные дашборды.', 'locked' => true]);
                     break;
@@ -865,11 +880,44 @@ try {
             break;
         }
         case 'apply_downgrade': {
-            echo json_encode(apply_downgrade($user_id,array_map('intval',$body['keep_ids']??[])));
+            $result = apply_downgrade($user_id, array_map('intval', $body['keep_ids'] ?? []));
+            if ($result['ok']) {
+                resolve_downgrade_choice($user_id);
+            }
+            echo json_encode($result);
             break;
         }
         case 'get_plans': {
             echo json_encode(['ok'=>true,'plans'=>get_all_plans()]);
+            break;
+        }
+
+        case 'get_downgrade_status': {
+            try {
+                $locked_s = $db->prepare("
+                    SELECT le.`entity_id` AS id, d.`name`
+                    FROM `locked_entities` le
+                    JOIN `dashboards` d ON d.`id` = le.`entity_id`
+                    WHERE le.`user_id` = ? AND le.`entity_type` = 'dashboard'
+                ");
+                $locked_s->execute([$user_id]);
+                $locked = $locked_s->fetchAll();
+
+                $all_s = $db->prepare("SELECT `id`, `name` FROM `dashboards` WHERE `owner_id` = ? ORDER BY `created_at` ASC");
+                $all_s->execute([$user_id]);
+                $all_dash = $all_s->fetchAll();
+
+                echo json_encode([
+                    'ok'           => true,
+                    'needs_choice' => needs_downgrade_choice($user_id),
+                    'locked'       => array_column($locked, 'id'),
+                    'locked_names' => $locked,
+                    'all'          => $all_dash,
+                    'limits'       => get_user_limits($user_id),
+                ]);
+            } catch (Throwable $e) {
+                echo json_encode(['ok'=>true,'needs_choice'=>false,'locked'=>[],'all'=>[],'limits'=>get_user_limits($user_id)]);
+            }
             break;
         }
         default:

@@ -47,6 +47,120 @@ function ensure_free_subscription(int $user_id): void {
        ->execute([$user_id,$free['id']]);
     } catch (Throwable $e) { /* таблицы ещё не готовы */ }
 }
+
+// ══════════════════════════════════════════════════════════════
+//  АВТО-ПРОВЕРКА ИСТЁКШИХ ПОДПИСОК
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * Вызывается при каждом запросе к API.
+ * Если подписка истекла — переводит на Free и замораживает лишние дашборды.
+ */
+function check_and_apply_expiry(int $user_id): void
+{
+    // Rate-limit: не чаще раза в 60 сек на пользователя (через сессию)
+    $sess_key = "expiry_checked_{$user_id}";
+    if (!empty($_SESSION[$sess_key]) && (time() - $_SESSION[$sess_key]) < 60) return;
+    $_SESSION[$sess_key] = time();
+
+    try {
+        $db = get_db();
+        $tables = $db->query("SHOW TABLES LIKE 'subscriptions'")->fetchAll();
+        if (empty($tables)) return;
+
+        // Найти истёкшие активные подписки (не Free)
+        $stmt = $db->prepare("
+            SELECT s.`id`, p.`slug`, p.`name`
+            FROM `subscriptions` s
+            JOIN `plans` p ON p.`id` = s.`plan_id`
+            WHERE s.`user_id` = ?
+              AND s.`status` = 'active'
+              AND s.`expires_at` <= NOW()
+              AND p.`slug` != 'free'
+        ");
+        $stmt->execute([$user_id]);
+        $expired = $stmt->fetchAll();
+
+        if (empty($expired)) return;
+
+        $db->beginTransaction();
+        try {
+            // Пометить как истёкшие
+            foreach ($expired as $sub) {
+                $db->prepare("UPDATE `subscriptions` SET `status`='expired' WHERE `id`=?")
+                   ->execute([$sub['id']]);
+            }
+
+            // Выдать Free-подписку
+            $free = get_plan_by_slug('free');
+            if ($free) {
+                // Проверить нет ли уже активной Free
+                $chk = $db->prepare("SELECT COUNT(*) FROM `subscriptions` WHERE `user_id`=? AND `plan_id`=? AND `status`='active' AND `expires_at`>NOW()");
+                $chk->execute([$user_id, $free['id']]);
+                if ((int)$chk->fetchColumn() === 0) {
+                    $db->prepare("INSERT INTO `subscriptions` (`user_id`,`plan_id`,`status`,`started_at`,`expires_at`) VALUES (?,?,'active',NOW(),DATE_ADD(NOW(),INTERVAL 100 YEAR))")
+                       ->execute([$user_id, $free['id']]);
+                }
+
+                // Авто-заморозить дашборды сверх лимита Free
+                $free_max = (int)$free['max_dashboards'];
+                if ($free_max !== -1) {
+                    auto_lock_excess_dashboards($user_id, $free_max);
+                }
+            }
+
+            $db->commit();
+
+            // Уведомить об истечении подписки
+            try {
+                $old_name = $expired[0]['name'] ?? 'Платный тариф';
+                $meta = json_encode(['old_plan' => $old_name, 'new_plan' => 'Free', 'expires_at' => date('Y-m-d H:i:s')]);
+                $db->prepare("INSERT INTO `notifications` (`user_id`,`type`,`dashboard_name`,`actor_name`,`role`,`meta_json`) VALUES (?,'subscription_expired','','Система','',?)")
+                   ->execute([$user_id, $meta]);
+            } catch (Throwable $e) {}
+
+        } catch (Throwable $e) {
+            if ($db->inTransaction()) $db->rollBack();
+        }
+    } catch (Throwable $e) { /* тихо */ }
+}
+
+/**
+ * Заморозить дашборды сверх лимита.
+ * Оставляет $max самых старых (по created_at) активными, остальные замораживает.
+ */
+function auto_lock_excess_dashboards(int $user_id, int $max): void
+{
+    $db = get_db();
+
+    // Получить все дашборды пользователя, отсортированные по дате создания
+    $stmt = $db->prepare("
+        SELECT d.`id`
+        FROM `dashboards` d
+        LEFT JOIN `locked_entities` le
+            ON le.`entity_id` = d.`id`
+            AND le.`user_id` = ?
+            AND le.`entity_type` = 'dashboard'
+        WHERE d.`owner_id` = ?
+        ORDER BY
+            le.`entity_id` IS NULL DESC,  -- сначала незаблокированные
+            d.`created_at` ASC            -- старые приоритетнее
+    ");
+    $stmt->execute([$user_id, $user_id]);
+    $all = array_column($stmt->fetchAll(), 'id');
+
+    // Первые $max оставляем, остальные замораживаем
+    $keep = array_slice($all, 0, $max);
+    $lock = array_slice($all, $max);
+
+    foreach ($lock as $did) {
+        $db->prepare("INSERT IGNORE INTO `locked_entities` (`user_id`,`entity_type`,`entity_id`) VALUES (?,'dashboard',?)")
+           ->execute([$user_id, (int)$did]);
+    }
+    // Сбросить флаг — показать экран выбора
+    reset_downgrade_choice($user_id);
+}
+
 function get_user_limits(int $user_id): array {
     $sub = get_active_subscription($user_id);
     return ['max_dashboards'=>(int)$sub['max_dashboards'],'max_pages'=>(int)$sub['max_pages'],'max_members'=>(int)$sub['max_members'],'plan_slug'=>$sub['slug'],'plan_name'=>$sub['plan_name']];
@@ -71,8 +185,17 @@ function can_invite_member(int $dashboard_id, int $user_id): array {
     return ['ok'=>true];
 }
 function is_dashboard_locked(int $dashboard_id, int $user_id): bool {
-    $s=get_db()->prepare("SELECT COUNT(*) FROM `locked_entities` WHERE `user_id`=? AND `entity_type`='dashboard' AND `entity_id`=?");
-    $s->execute([$user_id,$dashboard_id]); return (int)$s->fetchColumn()>0;
+    try {
+        // Безлимитный тариф — заморозки не может быть, чистим остатки
+        $limits = get_user_limits($user_id);
+        if (is_unlimited($limits['max_dashboards'])) {
+            get_db()->prepare("DELETE FROM `locked_entities` WHERE `user_id`=? AND `entity_type`='dashboard'")->execute([$user_id]);
+            return false;
+        }
+        $s = get_db()->prepare("SELECT COUNT(*) FROM `locked_entities` WHERE `user_id`=? AND `entity_type`='dashboard' AND `entity_id`=?");
+        $s->execute([$user_id, $dashboard_id]);
+        return (int)$s->fetchColumn() > 0;
+    } catch (Throwable $e) { return false; }
 }
 function get_wallet(int $user_id): array {
     $db=get_db(); $db->prepare("INSERT IGNORE INTO `wallets` (`user_id`,`balance`) VALUES (?,0.00)")->execute([$user_id]);
@@ -110,34 +233,43 @@ function activate_subscription(int $user_id, string $plan_slug): array {
         $expires=date('Y-m-d H:i:s',strtotime("+{$plan['duration_days']} days"));
         $db->prepare("INSERT INTO `subscriptions` (`user_id`,`plan_id`,`status`,`started_at`,`expires_at`) VALUES (?,?,'active',NOW(),?)")->execute([$user_id,$plan['id'],$expires]);
 
-        // При апгрейде — снять заморозку с дашбордов которые теперь вмещаются в новый лимит
+        // Применить лимиты нового тарифа
         $new_max = (int)$plan['max_dashboards'];
         if ($new_max === -1) {
             // Безлимит — разморозить всё
             $db->prepare("DELETE FROM `locked_entities` WHERE `user_id`=? AND `entity_type`='dashboard'")->execute([$user_id]);
         } else {
-            // Частичный апгрейд — разморозить столько дашбордов сколько теперь влезает
-            $locked_rows = $db->prepare("SELECT `entity_id` FROM `locked_entities` WHERE `user_id`=? AND `entity_type`='dashboard' ORDER BY `entity_id` ASC");
-            $locked_rows->execute([$user_id]);
-            $locked_ids = array_column($locked_rows->fetchAll(), 'entity_id');
+            // Получить текущие заблокированные
+            $lr = $db->prepare("SELECT `entity_id` FROM `locked_entities` WHERE `user_id`=? AND `entity_type`='dashboard'");
+            $lr->execute([$user_id]);
+            $locked_ids = array_column($lr->fetchAll(), 'entity_id');
 
-            // Сколько активных дашбордов уже есть (не заблокированных)
+            // Общее кол-во дашбордов
             $_s = $db->prepare("SELECT COUNT(*) FROM `dashboards` WHERE `owner_id`=?");
             $_s->execute([$user_id]);
             $total_dash = (int)$_s->fetchColumn();
             $active_count = $total_dash - count($locked_ids);
-            $can_unlock = max(0, $new_max - $active_count);
 
-            // Разморозить первые $can_unlock из заблокированных
-            $to_unlock = array_slice($locked_ids, 0, $can_unlock);
-            if ($to_unlock) {
-                $ph = implode(',', array_fill(0, count($to_unlock), '?'));
-                $db->prepare("DELETE FROM `locked_entities` WHERE `user_id`=? AND `entity_type`='dashboard' AND `entity_id` IN ($ph)")
-                   ->execute(array_merge([$user_id], array_map('intval', $to_unlock)));
+            if ($active_count > $new_max) {
+                // Даунгрейд — заморозить лишние автоматически
+                auto_lock_excess_dashboards($user_id, $new_max);
+                // Флаг уже сброшен внутри auto_lock_excess_dashboards
+            } elseif ($active_count < $new_max && count($locked_ids) > 0) {
+                // Апгрейд — разморозить сколько влезает
+                $can_unlock = $new_max - $active_count;
+                $to_unlock  = array_slice($locked_ids, 0, $can_unlock);
+                if ($to_unlock) {
+                    $ph = implode(',', array_fill(0, count($to_unlock), '?'));
+                    $db->prepare("DELETE FROM `locked_entities` WHERE `user_id`=? AND `entity_type`='dashboard' AND `entity_id` IN ($ph)")
+                       ->execute(array_merge([$user_id], array_map('intval', $to_unlock)));
+                }
             }
         }
 
         $db->commit();
+        // Сбросить сессионный rate-limit чтобы следующий запрос сразу проверил состояние
+        unset($_SESSION["expiry_checked_{$user_id}"]);
+
         // Уведомление вне транзакции — чтобы её ошибка не откатила подписку
         try { _notify_sub_change($user_id,$current,$plan); } catch(Throwable $e) { /* не критично */ }
         return ['ok'=>true,'plan'=>$plan['name'],'expires_at'=>$expires,'needs_downgrade'=>check_needs_downgrade($user_id,$plan)];
@@ -170,6 +302,57 @@ function _notify_sub_change(int $user_id, array $old, array $new_plan): void {
     $meta=json_encode(['old_plan'=>$old['plan_name']??'Free','new_plan'=>$new_plan['name'],'expires_at'=>date('Y-m-d H:i:s',strtotime("+{$new_plan['duration_days']} days"))]);
     get_db()->prepare("INSERT INTO `notifications` (`user_id`,`type`,`dashboard_name`,`actor_name`,`role`,`meta_json`) VALUES (?,'$type','','Система','',?)")->execute([$user_id,$meta]);
 }
+
+// ══════════════════════════════════════════════════════════════
+//  ФЛАГ ВЫБОРА ДАУНГРЕЙДА
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * Проверить нужно ли пользователю показать экран выбора дашбордов.
+ * Возвращает true если есть заблокированные И пользователь ещё не сделал выбор.
+ */
+function needs_downgrade_choice(int $user_id): bool
+{
+    try {
+        $db = get_db();
+        // Есть ли заблокированные дашборды?
+        $s = $db->prepare("SELECT COUNT(*) FROM `locked_entities` WHERE `user_id`=? AND `entity_type`='dashboard'");
+        $s->execute([$user_id]);
+        if ((int)$s->fetchColumn() === 0) return false;
+
+        // Пользователь уже сделал выбор?
+        $s2 = $db->prepare("SELECT `downgrade_resolved` FROM `subscriptions`
+            WHERE `user_id`=? AND `status`='active' ORDER BY `id` DESC LIMIT 1");
+        $s2->execute([$user_id]);
+        $row = $s2->fetch();
+        return $row && !(bool)$row['downgrade_resolved'];
+    } catch (Throwable $e) { return false; }
+}
+
+/**
+ * Пометить что пользователь уже сделал выбор дашбордов.
+ */
+function resolve_downgrade_choice(int $user_id): void
+{
+    try {
+        get_db()->prepare("UPDATE `subscriptions` SET `downgrade_resolved`=1
+            WHERE `user_id`=? AND `status`='active'")
+            ->execute([$user_id]);
+    } catch (Throwable $e) {}
+}
+
+/**
+ * Сбросить флаг при новом даунгрейде (чтобы снова показать выбор).
+ */
+function reset_downgrade_choice(int $user_id): void
+{
+    try {
+        get_db()->prepare("UPDATE `subscriptions` SET `downgrade_resolved`=0
+            WHERE `user_id`=? AND `status`='active'")
+            ->execute([$user_id]);
+    } catch (Throwable $e) {}
+}
+
 function admin_update_plan(int $plan_id, array $data): array {
     $allowed=['name','price','duration_days','max_dashboards','max_pages','max_members','is_active'];
     $sets=[]; $vals=[];

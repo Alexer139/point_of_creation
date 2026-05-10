@@ -46,7 +46,7 @@ $_nav_user = current_user();
     <a href="/billing.php"
        class="nav-billing <?= $navbar_active === 'billing' ? 'nav-billing--active' : '' ?>"
        title="Подписка и баланс счёта">
-      <?= icon('zap', '', 14) ?>
+      <?= icon('zap', 'nav-billing__icon', 15) ?>
       <span class="nav-billing__plan nav-billing__plan--<?= $_nav_sub['slug'] ?>"><?= htmlspecialchars($_nav_sub['plan_name']) ?></span>
     </a>
     <?php endif; ?>

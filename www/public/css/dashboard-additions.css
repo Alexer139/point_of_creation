@@ -18,9 +18,9 @@
   gap: 6px;
   padding: 5px 10px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface-2);
-  color: var(--text-1);
+  border-radius: var(--radius);
+  background: var(--bg2);
+  color: var(--text);
   cursor: pointer;
   font-size: .85rem;
   font-weight: 500;
@@ -28,8 +28,8 @@
   max-width: 220px;
 }
 .dashboard-selector__btn:hover {
-  background: var(--surface-3);
-  border-color: var(--accent);
+  background: var(--card);
+  border-color: var(--amber);
 }
 
 .dashboard-selector__name {
@@ -83,18 +83,18 @@
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
-  border-radius: var(--radius-sm);
+  border-radius: 0.75rem;
   cursor: pointer;
   font-size: .84rem;
-  color: var(--text-1);
+  color: var(--text);
   transition: background .12s;
 }
 .dashboard-menu__item:hover {
-  background: var(--surface-2);
+  background: var(--bg2);
 }
 .dashboard-menu__item--active {
-  background: var(--accent-subtle);
-  color: var(--accent);
+  background: var(--cream);
+  color: var(--amber);
   font-weight: 600;
 }
 .dashboard-menu__footer {
@@ -103,8 +103,8 @@
 }
 
 .dm-icon { flex-shrink: 0; opacity: .7; }
-.dm-icon--shared   { color: var(--accent); }
-.dm-icon--personal { color: var(--text-2); }
+.dm-icon--shared   { color: var(--amber); }
+.dm-icon--personal { color: var(--text2); }
 .dm-icon--invited  { color: #84a98c; }
 
 .dm-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -112,8 +112,8 @@
   font-size: .72rem;
   padding: 1px 5px;
   border-radius: 20px;
-  background: var(--surface-3);
-  color: var(--text-3);
+  background: var(--card);
+  color: var(--text3);
   flex-shrink: 0;
 }
 
@@ -126,8 +126,8 @@
   border-radius: 50%;
   flex-shrink: 0;
 }
-.badge--shared   { background: var(--accent-subtle); color: var(--accent); }
-.badge--personal { background: var(--surface-3);     color: var(--text-2); }
+.badge--shared   { background: var(--cream); color: var(--amber); }
+.badge--personal { background: var(--card);     color: var(--text2); }
 
 /* ── Pages Bar (вкладки страниц) ───────────────────────────── */
 
@@ -138,7 +138,7 @@
   padding: 0 16px;
   min-height: 42px;
   border-bottom: 1px solid var(--border);
-  background: var(--surface-1);
+  background: var(--bg);
   overflow-x: auto;
   flex-shrink: 0;
 }
@@ -158,17 +158,17 @@
   border: none;
   border-bottom: 2px solid transparent;
   background: transparent;
-  color: var(--text-2);
+  color: var(--text2);
   font-size: .83rem;
   cursor: pointer;
   transition: color .15s, border-color .15s;
   position: relative;
   white-space: nowrap;
 }
-.page-tab:hover { color: var(--text-1); }
+.page-tab:hover { color: var(--text); }
 .page-tab--active {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
+  color: var(--amber);
+  border-bottom-color: var(--amber);
   font-weight: 600;
 }
 
@@ -178,40 +178,40 @@
   justify-content: center;
   width: 14px; height: 14px;
   border-radius: 50%;
-  background: var(--surface-3);
+  background: var(--card);
   opacity: .6;
   font-size: 9px;
   cursor: pointer;
   margin-left: 2px;
 }
 .page-tab:hover .page-tab__del { display: inline-flex; }
-.page-tab__del:hover { opacity: 1; background: var(--danger-subtle); }
+.page-tab__del:hover { opacity: 1; background: rgba(251,113,133,.12); }
 
 .page-tab__rename-input {
-  border: 1px solid var(--accent);
+  border: 1px solid var(--amber);
   border-radius: 3px;
   padding: 1px 4px;
   font-size: .83rem;
   width: 90px;
-  background: var(--surface-1);
-  color: var(--text-1);
+  background: var(--bg);
+  color: var(--text);
   outline: none;
 }
 
 .pages-add-btn {
   flex-shrink: 0;
   width: 28px; height: 28px;
-  border-radius: var(--radius-sm);
+  border-radius: 0.75rem;
   border: 1px dashed var(--border);
   background: transparent;
-  color: var(--text-3);
+  color: var(--text3);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: color .15s, border-color .15s;
 }
 .pages-add-btn:hover {
-  color: var(--accent);
-  border-color: var(--accent);
+  color: var(--amber);
+  border-color: var(--amber);
 }
 
 /* Spacer */
@@ -221,7 +221,7 @@
 
 .share-hint {
   font-size: .85rem;
-  color: var(--text-2);
+  color: var(--text2);
   margin-bottom: 12px;
 }
 
@@ -241,11 +241,11 @@
 }
 .share-loading, .share-empty, .share-error {
   text-align: center;
-  color: var(--text-3);
+  color: var(--text3);
   font-size: .85rem;
   padding: 16px;
 }
-.share-error { color: var(--danger); }
+.share-error { color: var(--rose); }
 
 .share-member {
   display: flex;
@@ -253,22 +253,22 @@
   gap: 10px;
   padding: 8px 10px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface-2);
+  border-radius: var(--radius);
+  background: var(--bg2);
 }
 .sm-avatar {
   width: 32px; height: 32px;
   border-radius: 50%;
-  background: var(--accent-subtle);
-  color: var(--accent);
+  background: var(--cream);
+  color: var(--amber);
   font-weight: 700;
   font-size: .9rem;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
 .sm-info { flex: 1; overflow: hidden; }
-.sm-name { display: block; font-size: .85rem; font-weight: 600; color: var(--text-1); }
-.sm-email { display: block; font-size: .75rem; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sm-name { display: block; font-size: .85rem; font-weight: 600; color: var(--text); }
+.sm-email { display: block; font-size: .75rem; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ── Viewer notice ─────────────────────────────────────────── */
 
@@ -277,7 +277,7 @@
 }
 .sidebar__hint {
   font-size: .78rem;
-  color: var(--text-3);
+  color: var(--text3);
   line-height: 1.5;
   padding: 0 4px;
 }
@@ -291,21 +291,21 @@
   width: 100%;
   padding: 6px 8px;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 0.75rem;
   background: transparent;
-  color: var(--text-2);
+  color: var(--text2);
   font-size: .83rem;
   cursor: pointer;
   text-align: left;
   transition: background .12s, color .12s;
 }
 .sidebar__action:hover {
-  background: var(--surface-2);
-  color: var(--text-1);
+  background: var(--bg2);
+  color: var(--text);
 }
 .sidebar__action--danger:hover {
-  background: var(--danger-subtle);
-  color: var(--danger);
+  background: rgba(251,113,133,.12);
+  color: var(--rose);
 }
 
 /* ── Small modal ───────────────────────────────────────────── */
@@ -338,7 +338,7 @@
 .field__hint {
   display: block;
   font-size: .75rem;
-  color: var(--text-3);
+  color: var(--text3);
   margin-top: 3px;
 }
 
@@ -383,12 +383,12 @@
 
 /* ── Активная кнопка в navbar ───────────────────────────────── */
 .btn--ghost-active {
-  background: var(--surface-3);
-  color: var(--text-1);
+  background: var(--card);
+  color: var(--text);
 }
 .btn--admin-active {
   opacity: 1;
-  box-shadow: 0 0 0 2px var(--accent);
+  box-shadow: 0 0 0 2px var(--amber);
 }
 
 /* ── Nav billing badge ───────────────────────────────────────── */
@@ -396,22 +396,190 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 10px;
-  border-radius: var(--radius-md);
+  padding: 5px 12px 5px 9px;
+  border-radius: 20px;
   border: 1px solid var(--border);
-  background: var(--surface-2);
-  color: var(--text-2);
-  font-size: .8rem;
+  background: var(--bg2);
+  color: var(--text2);
+  font-size: .78rem;
+  font-weight: 600;
   text-decoration: none;
-  transition: all .15s;
+  transition: background .15s, border-color .15s, color .15s;
+  white-space: nowrap;
 }
-.nav-billing:hover,
-.nav-billing--active {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--accent-subtle);
+.nav-billing svg {
+  flex-shrink: 0;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  opacity: .85;
+  transition: opacity .15s;
 }
-.nav-billing__plan         { font-weight: 700; }
-.nav-billing__plan--free   { color: var(--text-2); }
-.nav-billing__plan--level1 { color: #6366f1; }
-.nav-billing__plan--level2 { color: var(--amber); }
+.nav-billing:hover {
+  background: var(--card);
+  border-color: var(--amber);
+  color: var(--text);
+}
+.nav-billing:hover svg { opacity: 1; }
+.nav-billing--active { border-color: var(--amber); }
+/* Цвет иконки по тарифу */
+.nav-billing--free   { color: var(--text2); }
+.nav-billing--level1 { color: #818cf8; }
+.nav-billing--level2 { color: var(--amber); }
+/* Цвет текста — чуть светлее иконки */
+.nav-billing__plan { font-weight: 700; color: inherit; }
+
+/* ── Заблокированные дашборды ────────────────────────────────── */
+.dashboard-menu__item--locked {
+  opacity: .65;
+  cursor: not-allowed;
+}
+.dashboard-menu__item--locked:hover {
+  background: rgba(239,68,68,.06);
+}
+.dm-icon--locked {
+  color: #ef4444;
+}
+.dm-role--locked {
+  font-size: .7rem;
+  padding: 1px 5px;
+  border-radius: 20px;
+  background: rgba(239,68,68,.12);
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* ── Downgrade choice modal (обязательный, нельзя закрыть) ──── */
+.overlay--alert {
+  /* Поверх всего, нельзя закрыть кликом вне */
+  z-index: 1000;
+}
+.overlay--alert .modal {
+  max-width: 480px;
+}
+.downgrade-info {
+  font-size: .875rem;
+  color: var(--text2);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+.downgrade-choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: .75rem;
+}
+.downgrade-counter {
+  text-align: right;
+  font-size: .82rem;
+  color: var(--text2);
+  margin-top: .25rem;
+}
+
+/* ════════════════════════════════════════════════════════════
+   Редизайн sidebar-секций: дашборд + подписка
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Секция с отступом и разделителем ───────────────────────── */
+.sidebar__section--dashboard,
+.sidebar__section--billing {
+  padding-top: .5rem;
+  margin-top: .25rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+}
+
+/* ── Новые кнопки действий ───────────────────────────────────── */
+.sidebar__action-btn {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  width: 100%;
+  padding: .42rem .65rem;
+  border-radius: var(--radius);
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  font-size: .82rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+  transition: background .12s, color .12s;
+  line-height: 1.4;
+}
+.sidebar__action-btn svg { flex-shrink: 0; opacity: .6; transition: opacity .12s; }
+.sidebar__action-btn:hover {
+  background: var(--bg2);
+  color: var(--text);
+}
+.sidebar__action-btn:hover svg { opacity: 1; }
+
+.sidebar__action-btn--danger { color: var(--text3); }
+.sidebar__action-btn--danger:hover {
+  background: rgba(239,68,68,.07);
+  color: #f87171;
+}
+.sidebar__action-btn--danger:hover svg { color: #f87171; opacity: 1; }
+
+/* Кнопка подписки */
+.sidebar__action-btn--billing {
+  color: var(--amber);
+  opacity: .9;
+}
+.sidebar__action-btn--billing:hover {
+  background: var(--bg2);
+  opacity: 1;
+}
+
+/* ── Карточка плана в сайдбаре ───────────────────────────────── */
+.sb-plan {
+  padding: .45rem .65rem;
+  border-radius: var(--radius);
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: .22rem;
+}
+.sb-plan__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .4rem;
+}
+.sb-plan__name {
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.sb-plan__badge {
+  font-size: .65rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 20px;
+  letter-spacing: .03em;
+}
+.sb-plan__badge--free   { background: var(--card); color: var(--text3); }
+.sb-plan__badge--level1 { background: rgba(99,102,241,.15); color: #6366f1; }
+.sb-plan__badge--level2 { background: rgba(212,160,87,.15); color: var(--amber); }
+
+.sb-plan__balance {
+  font-size: .75rem;
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  gap: .2rem;
+}
+.sb-plan__expires {
+  font-size: .7rem;
+  color: var(--text3);
+}
+.sb-plan__expires .fmt-date { color: var(--text2); }
+
+/* ── fmt-date в сайдбаре ─────────────────────────────────────── */
