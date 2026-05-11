@@ -22,9 +22,11 @@
   background: var(--bg2);
   color: var(--text);
   cursor: pointer;
-  font-size: .85rem;
+  font-size: 0.85rem;
   font-weight: 500;
-  transition: background .15s, border-color .15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
   max-width: 220px;
 }
 .dashboard-selector__btn:hover {
@@ -41,8 +43,8 @@
 
 .ds-chevron {
   flex-shrink: 0;
-  opacity: .6;
-  transition: transform .2s;
+  opacity: 0.6;
+  transition: transform 0.2s;
 }
 .dashboard-menu--open ~ * .ds-chevron,
 .dashboard-selector__btn[aria-expanded="true"] .ds-chevron {
@@ -65,11 +67,17 @@
 }
 .dashboard-menu--open {
   display: block;
-  animation: menu-in .15s ease;
+  animation: menu-in 0.15s ease;
 }
 @keyframes menu-in {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dashboard-menu__list {
@@ -85,9 +93,9 @@
   padding: 8px 10px;
   border-radius: 0.75rem;
   cursor: pointer;
-  font-size: .84rem;
+  font-size: 0.84rem;
   color: var(--text);
-  transition: background .12s;
+  transition: background 0.12s;
 }
 .dashboard-menu__item:hover {
   background: var(--bg2);
@@ -102,14 +110,28 @@
   border-top: 1px solid var(--border);
 }
 
-.dm-icon { flex-shrink: 0; opacity: .7; }
-.dm-icon--shared   { color: var(--amber); }
-.dm-icon--personal { color: var(--text2); }
-.dm-icon--invited  { color: #84a98c; }
+.dm-icon {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+.dm-icon--shared {
+  color: var(--amber);
+}
+.dm-icon--personal {
+  color: var(--text2);
+}
+.dm-icon--invited {
+  color: #84a98c;
+}
 
-.dm-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dm-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .dm-role {
-  font-size: .72rem;
+  font-size: 0.72rem;
   padding: 1px 5px;
   border-radius: 20px;
   background: var(--card);
@@ -122,12 +144,19 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px; height: 20px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   flex-shrink: 0;
 }
-.badge--shared   { background: var(--cream); color: var(--amber); }
-.badge--personal { background: var(--card);     color: var(--text2); }
+.badge--shared {
+  background: var(--cream);
+  color: var(--amber);
+}
+.badge--personal {
+  background: var(--card);
+  color: var(--text2);
+}
 
 /* ── Pages Bar (вкладки страниц) ───────────────────────────── */
 
@@ -159,13 +188,17 @@
   border-bottom: 2px solid transparent;
   background: transparent;
   color: var(--text2);
-  font-size: .83rem;
+  font-size: 0.83rem;
   cursor: pointer;
-  transition: color .15s, border-color .15s;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
   position: relative;
   white-space: nowrap;
 }
-.page-tab:hover { color: var(--text); }
+.page-tab:hover {
+  color: var(--text);
+}
 .page-tab--active {
   color: var(--amber);
   border-bottom-color: var(--amber);
@@ -176,22 +209,28 @@
   display: none;
   align-items: center;
   justify-content: center;
-  width: 14px; height: 14px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: var(--card);
-  opacity: .6;
+  opacity: 0.6;
   font-size: 9px;
   cursor: pointer;
   margin-left: 2px;
 }
-.page-tab:hover .page-tab__del { display: inline-flex; }
-.page-tab__del:hover { opacity: 1; background: rgba(251,113,133,.12); }
+.page-tab:hover .page-tab__del {
+  display: inline-flex;
+}
+.page-tab__del:hover {
+  opacity: 1;
+  background: rgba(251, 113, 133, 0.12);
+}
 
 .page-tab__rename-input {
   border: 1px solid var(--amber);
   border-radius: 3px;
   padding: 1px 4px;
-  font-size: .83rem;
+  font-size: 0.83rem;
   width: 90px;
   background: var(--bg);
   color: var(--text);
@@ -200,14 +239,19 @@
 
 .pages-add-btn {
   flex-shrink: 0;
-  width: 28px; height: 28px;
+  width: 28px;
+  height: 28px;
   border-radius: 0.75rem;
   border: 1px dashed var(--border);
   background: transparent;
   color: var(--text3);
   cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: color .15s, border-color .15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
 }
 .pages-add-btn:hover {
   color: var(--amber);
@@ -215,12 +259,14 @@
 }
 
 /* Spacer */
-.topbar__spacer { flex: 1; }
+.topbar__spacer {
+  flex: 1;
+}
 
 /* ── Share modal ───────────────────────────────────────────── */
 
 .share-hint {
-  font-size: .85rem;
+  font-size: 0.85rem;
   color: var(--text2);
   margin-bottom: 12px;
 }
@@ -231,7 +277,10 @@
   gap: 8px;
   flex-wrap: wrap;
 }
-.input--grow { flex: 1; min-width: 160px; }
+.input--grow {
+  flex: 1;
+  min-width: 160px;
+}
 
 .share-members {
   margin-top: 16px;
@@ -239,13 +288,17 @@
   flex-direction: column;
   gap: 8px;
 }
-.share-loading, .share-empty, .share-error {
+.share-loading,
+.share-empty,
+.share-error {
   text-align: center;
   color: var(--text3);
-  font-size: .85rem;
+  font-size: 0.85rem;
   padding: 16px;
 }
-.share-error { color: var(--rose); }
+.share-error {
+  color: var(--rose);
+}
 
 .share-member {
   display: flex;
@@ -257,18 +310,36 @@
   background: var(--bg2);
 }
 .sm-avatar {
-  width: 32px; height: 32px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--cream);
   color: var(--amber);
   font-weight: 700;
-  font-size: .9rem;
-  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
-.sm-info { flex: 1; overflow: hidden; }
-.sm-name { display: block; font-size: .85rem; font-weight: 600; color: var(--text); }
-.sm-email { display: block; font-size: .75rem; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sm-info {
+  flex: 1;
+  overflow: hidden;
+}
+.sm-name {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.sm-email {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* ── Viewer notice ─────────────────────────────────────────── */
 
@@ -276,7 +347,7 @@
   color: #84a98c;
 }
 .sidebar__hint {
-  font-size: .78rem;
+  font-size: 0.78rem;
   color: var(--text3);
   line-height: 1.5;
   padding: 0 4px;
@@ -294,17 +365,19 @@
   border-radius: 0.75rem;
   background: transparent;
   color: var(--text2);
-  font-size: .83rem;
+  font-size: 0.83rem;
   cursor: pointer;
   text-align: left;
-  transition: background .12s, color .12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
 }
 .sidebar__action:hover {
   background: var(--bg2);
   color: var(--text);
 }
 .sidebar__action--danger:hover {
-  background: rgba(251,113,133,.12);
+  background: rgba(251, 113, 133, 0.12);
   color: var(--rose);
 }
 
@@ -326,7 +399,7 @@
 
 .btn--xs {
   padding: 3px 8px;
-  font-size: .75rem;
+  font-size: 0.75rem;
 }
 .btn--full {
   width: 100%;
@@ -337,7 +410,7 @@
 
 .field__hint {
   display: block;
-  font-size: .75rem;
+  font-size: 0.75rem;
   color: var(--text3);
   margin-top: 3px;
 }
@@ -401,49 +474,65 @@
   border: 1px solid var(--border);
   background: var(--bg2);
   color: var(--text2);
-  font-size: .78rem;
+  font-size: 0.78rem;
   font-weight: 600;
   text-decoration: none;
-  transition: background .15s, border-color .15s, color .15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
   white-space: nowrap;
 }
 .nav-billing svg {
   flex-shrink: 0;
   stroke: currentColor;
   stroke-width: 2.5;
-  opacity: .85;
-  transition: opacity .15s;
+  opacity: 0.85;
+  transition: opacity 0.15s;
 }
 .nav-billing:hover {
   background: var(--card);
   border-color: var(--amber);
   color: var(--text);
 }
-.nav-billing:hover svg { opacity: 1; }
-.nav-billing--active { border-color: var(--amber); }
+.nav-billing:hover svg {
+  opacity: 1;
+}
+.nav-billing--active {
+  border-color: var(--amber);
+}
 /* Цвет иконки по тарифу */
-.nav-billing--free   { color: var(--text2); }
-.nav-billing--level1 { color: #818cf8; }
-.nav-billing--level2 { color: var(--amber); }
+.nav-billing--free {
+  color: var(--text2);
+}
+.nav-billing--level1 {
+  color: #818cf8;
+}
+.nav-billing--level2 {
+  color: var(--amber);
+}
 /* Цвет текста — чуть светлее иконки */
-.nav-billing__plan { font-weight: 700; color: inherit; }
+.nav-billing__plan {
+  font-weight: 700;
+  color: inherit;
+}
 
 /* ── Заблокированные дашборды ────────────────────────────────── */
 .dashboard-menu__item--locked {
-  opacity: .65;
+  opacity: 0.65;
   cursor: not-allowed;
 }
 .dashboard-menu__item--locked:hover {
-  background: rgba(239,68,68,.06);
+  background: rgba(239, 68, 68, 0.06);
 }
 .dm-icon--locked {
   color: #ef4444;
 }
 .dm-role--locked {
-  font-size: .7rem;
+  font-size: 0.7rem;
   padding: 1px 5px;
   border-radius: 20px;
-  background: rgba(239,68,68,.12);
+  background: rgba(239, 68, 68, 0.12);
   color: #ef4444;
   display: flex;
   align-items: center;
@@ -459,7 +548,7 @@
   max-width: 480px;
 }
 .downgrade-info {
-  font-size: .875rem;
+  font-size: 0.875rem;
   color: var(--text2);
   line-height: 1.6;
   margin-bottom: 1rem;
@@ -467,16 +556,16 @@
 .downgrade-choice-list {
   display: flex;
   flex-direction: column;
-  gap: .4rem;
+  gap: 0.4rem;
   max-height: 300px;
   overflow-y: auto;
-  margin-bottom: .75rem;
+  margin-bottom: 0.75rem;
 }
 .downgrade-counter {
   text-align: right;
-  font-size: .82rem;
+  font-size: 0.82rem;
   color: var(--text2);
-  margin-top: .25rem;
+  margin-top: 0.25rem;
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -486,51 +575,64 @@
 /* ── Секция с отступом и разделителем ───────────────────────── */
 .sidebar__section--dashboard,
 .sidebar__section--billing {
-  padding-top: .5rem;
-  margin-top: .25rem;
+  padding-top: 0.5rem;
+  margin-top: 0.25rem;
   border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  gap: .3rem;
+  gap: 0.3rem;
 }
 
 /* ── Новые кнопки действий ───────────────────────────────────── */
 .sidebar__action-btn {
   display: flex;
   align-items: center;
-  gap: .5rem;
+  gap: 0.5rem;
   width: 100%;
-  padding: .42rem .65rem;
+  padding: 0.42rem 0.65rem;
   border-radius: var(--radius);
   border: none;
   background: transparent;
   color: var(--text2);
-  font-size: .82rem;
+  font-size: 0.82rem;
   font-weight: 500;
   cursor: pointer;
   text-align: left;
   text-decoration: none;
-  transition: background .12s, color .12s;
+  transition:
+    background 0.12s,
+    color 0.12s;
   line-height: 1.4;
 }
-.sidebar__action-btn svg { flex-shrink: 0; opacity: .6; transition: opacity .12s; }
+.sidebar__action-btn svg {
+  flex-shrink: 0;
+  opacity: 0.6;
+  transition: opacity 0.12s;
+}
 .sidebar__action-btn:hover {
   background: var(--bg2);
   color: var(--text);
 }
-.sidebar__action-btn:hover svg { opacity: 1; }
+.sidebar__action-btn:hover svg {
+  opacity: 1;
+}
 
-.sidebar__action-btn--danger { color: var(--text3); }
+.sidebar__action-btn--danger {
+  color: var(--text3);
+}
 .sidebar__action-btn--danger:hover {
-  background: rgba(239,68,68,.07);
+  background: rgba(239, 68, 68, 0.07);
   color: #f87171;
 }
-.sidebar__action-btn--danger:hover svg { color: #f87171; opacity: 1; }
+.sidebar__action-btn--danger:hover svg {
+  color: #f87171;
+  opacity: 1;
+}
 
 /* Кнопка подписки */
 .sidebar__action-btn--billing {
   color: var(--amber);
-  opacity: .9;
+  opacity: 0.9;
 }
 .sidebar__action-btn--billing:hover {
   background: var(--bg2);
@@ -539,47 +641,758 @@
 
 /* ── Карточка плана в сайдбаре ───────────────────────────────── */
 .sb-plan {
-  padding: .45rem .65rem;
+  padding: 0.45rem 0.65rem;
   border-radius: var(--radius);
   background: var(--bg2);
   border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  gap: .22rem;
+  gap: 0.22rem;
 }
 .sb-plan__row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: .4rem;
+  gap: 0.4rem;
 }
 .sb-plan__name {
-  font-size: .82rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: var(--text);
 }
 .sb-plan__badge {
-  font-size: .65rem;
+  font-size: 0.65rem;
   font-weight: 700;
   padding: 1px 6px;
   border-radius: 20px;
-  letter-spacing: .03em;
+  letter-spacing: 0.03em; /* ============================================================
+   public/css/dashboard-additions.css
+   Point of Creation — стили для мульти-дашбордов, вкладок и shared-режима
+   Подключается ПОСЛЕ основного app.css
+   ============================================================ */
+
+  /* ── Dashboard Selector (navbar) ──────────────────────────── */
+
+  .dashboard-selector {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .dashboard-selector__btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg2);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition:
+      background 0.15s,
+      border-color 0.15s;
+    max-width: 220px;
+  }
+  .dashboard-selector__btn:hover {
+    background: var(--card);
+    border-color: var(--amber);
+  }
+
+  .dashboard-selector__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 140px;
+  }
+
+  .ds-chevron {
+    flex-shrink: 0;
+    opacity: 0.6;
+    transition: transform 0.2s;
+  }
+  .dashboard-menu--open ~ * .ds-chevron,
+  .dashboard-selector__btn[aria-expanded="true"] .ds-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Dropdown menu */
+  .dashboard-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 200;
+    min-width: 240px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+  .dashboard-menu--open {
+    display: block;
+    animation: menu-in 0.15s ease;
+  }
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .dashboard-menu__list {
+    max-height: 280px;
+    overflow-y: auto;
+    padding: 4px;
+  }
+
+  .dashboard-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    font-size: 0.84rem;
+    color: var(--text);
+    transition: background 0.12s;
+  }
+  .dashboard-menu__item:hover {
+    background: var(--bg2);
+  }
+  .dashboard-menu__item--active {
+    background: var(--cream);
+    color: var(--amber);
+    font-weight: 600;
+  }
+  .dashboard-menu__footer {
+    padding: 6px 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .dm-icon {
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+  .dm-icon--shared {
+    color: var(--amber);
+  }
+  .dm-icon--personal {
+    color: var(--text2);
+  }
+  .dm-icon--invited {
+    color: #84a98c;
+  }
+
+  .dm-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .dm-role {
+    font-size: 0.72rem;
+    padding: 1px 5px;
+    border-radius: 20px;
+    background: var(--card);
+    color: var(--text3);
+    flex-shrink: 0;
+  }
+
+  /* Badges */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .badge--shared {
+    background: var(--cream);
+    color: var(--amber);
+  }
+  .badge--personal {
+    background: var(--card);
+    color: var(--text2);
+  }
+
+  /* ── Pages Bar (вкладки страниц) ───────────────────────────── */
+
+  .pages-bar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 16px;
+    min-height: 42px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    overflow-x: auto;
+    flex-shrink: 0;
+  }
+
+  .pages-tabs {
+    display: flex;
+    align-items: stretch;
+    gap: 2px;
+    flex: 0 0 auto;
+  }
+
+  .page-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--text2);
+    font-size: 0.83rem;
+    cursor: pointer;
+    transition:
+      color 0.15s,
+      border-color 0.15s;
+    position: relative;
+    white-space: nowrap;
+  }
+  .page-tab:hover {
+    color: var(--text);
+  }
+  .page-tab--active {
+    color: var(--amber);
+    border-bottom-color: var(--amber);
+    font-weight: 600;
+  }
+
+  .page-tab__del {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--card);
+    opacity: 0.6;
+    font-size: 9px;
+    cursor: pointer;
+    margin-left: 2px;
+  }
+  .page-tab:hover .page-tab__del {
+    display: inline-flex;
+  }
+  .page-tab__del:hover {
+    opacity: 1;
+    background: rgba(251, 113, 133, 0.12);
+  }
+
+  .page-tab__rename-input {
+    border: 1px solid var(--amber);
+    border-radius: 3px;
+    padding: 1px 4px;
+    font-size: 0.83rem;
+    width: 90px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+  }
+
+  .pages-add-btn {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 0.75rem;
+    border: 1px dashed var(--border);
+    background: transparent;
+    color: var(--text3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+      color 0.15s,
+      border-color 0.15s;
+  }
+  .pages-add-btn:hover {
+    color: var(--amber);
+    border-color: var(--amber);
+  }
+
+  /* Spacer */
+  .topbar__spacer {
+    flex: 1;
+  }
+
+  /* ── Share modal ───────────────────────────────────────────── */
+
+  .share-hint {
+    font-size: 0.85rem;
+    color: var(--text2);
+    margin-bottom: 12px;
+  }
+
+  .field--row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .input--grow {
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .share-members {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .share-loading,
+  .share-empty,
+  .share-error {
+    text-align: center;
+    color: var(--text3);
+    font-size: 0.85rem;
+    padding: 16px;
+  }
+  .share-error {
+    color: var(--rose);
+  }
+
+  .share-member {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg2);
+  }
+  .sm-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--cream);
+    color: var(--amber);
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .sm-info {
+    flex: 1;
+    overflow: hidden;
+  }
+  .sm-name {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .sm-email {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text3);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ── Viewer notice ─────────────────────────────────────────── */
+
+  .viewer-notice {
+    color: #84a98c;
+  }
+  .sidebar__hint {
+    font-size: 0.78rem;
+    color: var(--text3);
+    line-height: 1.5;
+    padding: 0 4px;
+  }
+
+  /* ── Sidebar actions ───────────────────────────────────────── */
+
+  .sidebar__action {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 6px 8px;
+    border: none;
+    border-radius: 0.75rem;
+    background: transparent;
+    color: var(--text2);
+    font-size: 0.83rem;
+    cursor: pointer;
+    text-align: left;
+    transition:
+      background 0.12s,
+      color 0.12s;
+  }
+  .sidebar__action:hover {
+    background: var(--bg2);
+    color: var(--text);
+  }
+  .sidebar__action--danger:hover {
+    background: rgba(251, 113, 133, 0.12);
+    color: var(--rose);
+  }
+
+  /* ── Small modal ───────────────────────────────────────────── */
+
+  .modal--sm {
+    max-width: 400px;
+  }
+
+  .field__label--checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 400;
+  }
+
+  /* ── Btn extra sizes ───────────────────────────────────────── */
+
+  .btn--xs {
+    padding: 3px 8px;
+    font-size: 0.75rem;
+  }
+  .btn--full {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* ── Auth field hint ───────────────────────────────────────── */
+
+  .field__hint {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text3);
+    margin-top: 3px;
+  }
+
+  /* ── Read-only widget (viewer role) ─────────────────────────── */
+  .widget--readonly {
+    cursor: default !important;
+  }
+  .widget--readonly .widget__head {
+    cursor: default !important;
+  }
+  .widget--readonly .note-textarea,
+  .widget--readonly .checklist__text,
+  .widget--readonly .data-table td[contenteditable] {
+    pointer-events: none;
+    user-select: text;
+    background: transparent;
+    cursor: default;
+  }
+  .widget--readonly .checklist__check {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+  .widget--readonly .checklist__delete,
+  .widget--readonly .checklist__add,
+  .widget--readonly .data-table__add,
+  .widget--readonly .goal__inputs {
+    display: none !important;
+  }
+  .widget--readonly .metric {
+    cursor: default !important;
+  }
+  .widget--readonly .metric__hint {
+    display: none !important;
+  }
+  .widget--readonly .cal__day {
+    pointer-events: none;
+  }
+  .widget--readonly .cal__nav-btn {
+    /* навигация по месяцам разрешена — только просмотр */
+    pointer-events: auto;
+  }
+
+  /* ── Активная кнопка в navbar ───────────────────────────────── */
+  .btn--ghost-active {
+    background: var(--card);
+    color: var(--text);
+  }
+  .btn--admin-active {
+    opacity: 1;
+    box-shadow: 0 0 0 2px var(--amber);
+  }
+
+  /* ── Nav billing badge ───────────────────────────────────────── */
+  .nav-billing {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px 5px 9px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    color: var(--text2);
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      background 0.15s,
+      border-color 0.15s,
+      color 0.15s;
+    white-space: nowrap;
+  }
+  .nav-billing svg {
+    flex-shrink: 0;
+    stroke: currentColor;
+    stroke-width: 2.5;
+    opacity: 0.85;
+    transition: opacity 0.15s;
+  }
+  .nav-billing:hover {
+    background: var(--card);
+    border-color: var(--amber);
+    color: var(--text);
+  }
+  .nav-billing:hover svg {
+    opacity: 1;
+  }
+  .nav-billing--active {
+    border-color: var(--amber);
+  }
+  /* Цвет иконки по тарифу */
+  .nav-billing--free {
+    color: var(--text2);
+  }
+  .nav-billing--level1 {
+    color: #818cf8;
+  }
+  .nav-billing--level2 {
+    color: var(--amber);
+  }
+  /* Цвет текста — чуть светлее иконки */
+  .nav-billing__plan {
+    font-weight: 700;
+    color: inherit;
+  }
+
+  /* ── Заблокированные дашборды ────────────────────────────────── */
+  .dashboard-menu__item--locked {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+  .dashboard-menu__item--locked:hover {
+    background: rgba(239, 68, 68, 0.06);
+  }
+  .dm-icon--locked {
+    color: #ef4444;
+  }
+  .dm-role--locked {
+    font-size: 0.7rem;
+    padding: 1px 5px;
+    border-radius: 20px;
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  /* ── Downgrade choice modal (обязательный, нельзя закрыть) ──── */
+  .overlay--alert {
+    /* Поверх всего, нельзя закрыть кликом вне */
+    z-index: 1000;
+  }
+  .overlay--alert .modal {
+    max-width: 480px;
+  }
+  .downgrade-info {
+    font-size: 0.875rem;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  .downgrade-choice-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 0.75rem;
+  }
+  .downgrade-counter {
+    text-align: right;
+    font-size: 0.82rem;
+    color: var(--text2);
+    margin-top: 0.25rem;
+  }
+
+  /* ════════════════════════════════════════════════════════════
+   Редизайн sidebar-секций: дашборд + подписка
+   ════════════════════════════════════════════════════════════ */
+
+  /* ── Секция с отступом и разделителем ───────────────────────── */
+  .sidebar__section--dashboard,
+  .sidebar__section--billing {
+    padding-top: 0.5rem;
+    margin-top: 0.25rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  /* ── Новые кнопки действий ───────────────────────────────────── */
+  .sidebar__action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.42rem 0.65rem;
+    border-radius: var(--radius);
+    border: none;
+    background: transparent;
+    color: var(--text2);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    text-decoration: none;
+    transition:
+      background 0.12s,
+      color 0.12s;
+    line-height: 1.4;
+  }
+  .sidebar__action-btn svg {
+    flex-shrink: 0;
+    opacity: 0.6;
+    transition: opacity 0.12s;
+  }
+  .sidebar__action-btn:hover {
+    background: var(--bg2);
+    color: var(--text);
+  }
+  .sidebar__action-btn:hover svg {
+    opacity: 1;
+  }
+
+  .sidebar__action-btn--danger {
+    color: var(--text3);
+  }
+  .sidebar__action-btn--danger:hover {
+    background: rgba(239, 68, 68, 0.07);
+    color: #f87171;
+  }
+  .sidebar__action-btn--danger:hover svg {
+    color: #f87171;
+    opacity: 1;
+  }
+
+  /* Кнопка подписки */
+  .sidebar__action-btn--billing {
+    color: var(--amber);
+    opacity: 0.9;
+  }
+  .sidebar__action-btn--billing:hover {
+    background: var(--bg2);
+    opacity: 1;
+  }
+
+  /* ── Карточка плана в сайдбаре ───────────────────────────────── */
+  .sb-plan {
+    padding: 0.45rem 0.65rem;
+    border-radius: var(--radius);
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.22rem;
+  }
+  .sb-plan__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem;
+  }
+  .sb-plan__name {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .sb-plan__badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 20px;
+    letter-spacing: 0.03em;
+  }
+  .sb-plan__badge--free {
+    background: var(--card);
+    color: var(--text3);
+  }
+  .sb-plan__badge--level1 {
+    background: rgba(99, 102, 241, 0.15);
+    color: #6366f1;
+  }
+  .sb-plan__badge--level2 {
+    background: rgba(212, 160, 87, 0.15);
+    color: var(--amber);
+  }
+
+  .sb-plan__balance {
+    font-size: 0.75rem;
+    color: var(--text3);
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+  }
+  .sb-plan__expires {
+    font-size: 0.7rem;
+    color: var(--text3);
+  }
+  .sb-plan__expires .fmt-date {
+    color: var(--text2);
+  }
+
+  /* ── fmt-date в сайдбаре ─────────────────────────────────────── */
+
+  /* ── Logo fix — убрать перекраску при клике ──────────────────── */
+  
 }
-.sb-plan__badge--free   { background: var(--card); color: var(--text3); }
-.sb-plan__badge--level1 { background: rgba(99,102,241,.15); color: #6366f1; }
-.sb-plan__badge--level2 { background: rgba(212,160,87,.15); color: var(--amber); }
+.sb-plan__badge--free {
+  background: var(--card);
+  color: var(--text3);
+}
+.sb-plan__badge--level1 {
+  background: rgba(99, 102, 241, 0.15);
+  color: #6366f1;
+}
+.sb-plan__badge--level2 {
+  background: rgba(212, 160, 87, 0.15);
+  color: var(--amber);
+}
 
 .sb-plan__balance {
-  font-size: .75rem;
+  font-size: 0.75rem;
   color: var(--text3);
   display: flex;
   align-items: center;
-  gap: .2rem;
+  gap: 0.2rem;
 }
 .sb-plan__expires {
-  font-size: .7rem;
+  font-size: 0.7rem;
   color: var(--text3);
 }
-.sb-plan__expires .fmt-date { color: var(--text2); }
+.sb-plan__expires .fmt-date {
+  color: var(--text2);
+}
 
 /* ── fmt-date в сайдбаре ─────────────────────────────────────── */

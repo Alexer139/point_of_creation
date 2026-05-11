@@ -162,6 +162,18 @@ body {
   font-style: italic;
 }
 
+.logo:active,
+.logo:visited,
+.logo:focus {
+  color: inherit;
+  outline: none;
+}
+.logo__mark svg,
+.logo__mark .icon {
+  color: #fff !important;
+  stroke: #fff !important;
+}
+
 .nav-spacer {
   flex: 1;
 }

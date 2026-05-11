@@ -22,7 +22,6 @@ require __DIR__ . '/templates/navbar.php'; ?>
 
   <!-- МИССИЯ -->
   <section class="about-section">
-    <div class="about-section__tag"><?= icon('target', '', 15) ?> Миссия</div>
     <h2 class="about-section__title">Почему это важно именно сейчас</h2>
     <div class="about-section__body">
       <p>
@@ -44,7 +43,6 @@ require __DIR__ . '/templates/navbar.php'; ?>
 
   <!-- АРХИТЕКТУРА -->
   <section class="about-section">
-    <div class="about-section__tag"><?= icon('layers', '', 15) ?> Архитектура</div>
     <h2 class="about-section__title">Иерархическая структура пространства</h2>
     <div class="about-section__body">
       <p>
@@ -86,7 +84,6 @@ require __DIR__ . '/templates/navbar.php'; ?>
 
   <!-- ФУНКЦИИ -->
   <section class="about-section">
-    <div class="about-section__tag"><?= icon('zap', '', 15) ?> Возможности</div>
     <h2 class="about-section__title">Всё что нужно — в одном месте</h2>
     <div class="about-features">
       <div class="about-feature">
@@ -157,7 +154,6 @@ require __DIR__ . '/templates/navbar.php'; ?>
 
   <!-- ТАРИФЫ -->
   <section class="about-section">
-    <div class="about-section__tag"><?= icon('zap', '', 15) ?> Тарифы</div>
     <h2 class="about-section__title">Выберите свой уровень</h2>
     <div class="about-section__body">
       <p>Начните бесплатно — платите только когда нужно больше пространства.</p>
@@ -173,7 +169,6 @@ require __DIR__ . '/templates/navbar.php'; ?>
           <li><?= icon('check', '', 13) ?> 3 дашборда</li>
           <li><?= icon('check', '', 13) ?> 5 страниц на дашборд</li>
           <li><?= icon('check', '', 13) ?> 1 участник на дашборд</li>
-          <li><?= icon('check', '', 13) ?> Все виджеты</li>
         </ul>
         <?php if (!is_logged_in()): ?>
           <a href="/register.php" class="btn btn--ghost" style="text-align:center">Начать бесплатно</a>
@@ -190,7 +185,6 @@ require __DIR__ . '/templates/navbar.php'; ?>
           <li><?= icon('check', '', 13) ?> 5 дашбордов</li>
           <li><?= icon('check', '', 13) ?> 10 страниц на дашборд</li>
           <li><?= icon('check', '', 13) ?> 5 участников на дашборд</li>
-          <li><?= icon('check', '', 13) ?> Приоритетная поддержка</li>
         </ul>
         <?php if (is_logged_in()): ?>
           <a href="/billing.php" class="btn btn--warm" style="text-align:center">Подключить</a>
@@ -224,7 +218,6 @@ require __DIR__ . '/templates/navbar.php'; ?>
 
   <!-- КОРПОРАТИВНЫЙ РЕЖИМ -->
   <section class="about-section">
-    <div class="about-section__tag"><?= icon('share-2', '', 15) ?> Совместная работа</div>
     <h2 class="about-section__title">Корпоративный режим</h2>
     <div class="about-section__body">
       <p>
@@ -268,7 +261,6 @@ require __DIR__ . '/templates/navbar.php'; ?>
 
   <!-- БЕЗОПАСНОСТЬ -->
   <section class="about-section">
-    <div class="about-section__tag"><?= icon('shield', '', 15) ?> Безопасность</div>
     <h2 class="about-section__title">Ваши данные — только ваши</h2>
     <div class="about-security">
       <div>
@@ -296,7 +288,6 @@ require __DIR__ . '/templates/navbar.php'; ?>
 
   <!-- ФИЛОСОФИЯ -->
   <section class="about-section">
-    <div class="about-section__tag"><?= icon('info', '', 15) ?> Философия</div>
     <h2 class="about-section__title">Меньше — значит больше</h2>
     <div class="about-section__body">
       <p>
@@ -320,7 +311,7 @@ require __DIR__ . '/templates/navbar.php'; ?>
         <span class="about-footer__name">Point of <em>Creation</em></span>
       </div>
       <div class="about-footer__copy">
-        © 2026 Point of Creation — личное и командное пространство для глубокой работы.
+        © 2026 Point of Creation — личное и командное пространство для работы.
       </div>
     </div>
     <nav class="about-footer__links">

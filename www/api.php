@@ -367,9 +367,10 @@ try {
             $type          = substr(trim($body['type'] ?? 'note'), 0, 32);
             $title         = substr(trim($body['title'] ?? ''), 0, 120);
             $settings_json = clean_json($body['settings_json'] ?? $body['content'] ?? '{}');
-            $position_data = clean_json($body['position_data'] ?? [
+            $position_data = clean_json([
                 'w'          => max(1, min(4, (int)($body['position_w'] ?? 1))),
                 'h'          => max(1, min(3, (int)($body['position_h'] ?? 1))),
+                'h_px'       => max(0, (int)($body['position_h_px'] ?? 0)),
                 'sort_order' => (int)($body['sort_order'] ?? 0),
             ]);
 
@@ -516,6 +517,7 @@ try {
                 $position_data = clean_json([
                     'w'          => max(1, min(4, (int)($w['position_w'] ?? $w['w'] ?? 1))),
                     'h'          => max(1, min(3, (int)($w['position_h'] ?? $w['h'] ?? 1))),
+                    'h_px'       => max(0, (int)($w['position_h_px'] ?? 0)),
                     'sort_order' => $idx,
                 ]);
 

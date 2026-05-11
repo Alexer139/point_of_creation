@@ -16,6 +16,8 @@ function layout_start(string $title = 'Dashboard', array $opts = []): void
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="<?= csrf_token() ?>">
     <title><?= htmlspecialchars($title) ?> — Point of Creation</title>
+    <link rel="icon" type="image/svg+xml" href="/public/img/favicon.svg">
+    <link rel="shortcut icon" href="/public/img/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fraunces:ital,wght@0,500;0,700;1,300;1,500&display=swap"
