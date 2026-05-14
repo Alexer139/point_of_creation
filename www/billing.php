@@ -149,34 +149,29 @@ require __DIR__ . '/templates/navbar.php'; ?>
           <div class="wallet-balance__label">Доступно</div>
         </div>
 
-        <?php
-        $yukassa_enabled = !empty(getenv('YUKASSA_SHOP_ID')) && !empty(getenv('YUKASSA_SECRET'));
-        ?>
+        <?php $yukassa_enabled = !empty(getenv('YUKASSA_SHOP_ID')) && !empty(getenv('YUKASSA_SECRET')); ?>
 
-        <?php if ($yukassa_enabled): ?>
-          <!-- Реальная оплата через ЮKassa -->
-          <form id="topup-form" method="POST" action="/payment.php?action=create">
-            <input type="hidden" name="csrf" value="<?= csrf_token() ?>">
-            <div class="wallet-topup">
-              <input type="number" class="input" id="topup-amount" name="amount" placeholder="Сумма пополнения" min="1"
-                max="100000" step="1">
-              <button type="submit" class="btn btn--warm">
-                <?= icon('credit-card', '', 14) ?> Оплатить
-              </button>
-            </div>
-          </form>
-        <?php else: ?>
-          <!-- Демо-режим: прямое зачисление (пока нет ЮKassa) -->
-          <div class="wallet-topup">
-            <input type="number" class="input" id="topup-amount" placeholder="Сумма (демо)" min="1" max="100000" step="1">
-            <button class="btn btn--warm" onclick="topupWalletDemo()">
-              <?= icon('plus', '', 14) ?> Пополнить
-            </button>
-          </div>
+        <div class="wallet-topup">
+          <input type="number" class="input" id="topup-amount" placeholder="Сумма пополнения" min="1" max="100000"
+            step="1">
+          <button class="btn btn--warm" onclick="openTopupWidget()">
+            <?= icon($yukassa_enabled ? 'credit-card' : 'plus', '', 14) ?>
+            <?= $yukassa_enabled ? 'Оплатить' : 'Пополнить' ?>
+          </button>
+        </div>
+        <?php if (!$yukassa_enabled): ?>
           <div class="demo-notice">
-            <?= icon('info', '', 12) ?> Демо-режим. Для реальных платежей задайте YUKASSA_SHOP_ID и YUKASSA_SECRET.
+            <?= icon('info', '', 12) ?> Демо-режим — задайте YUKASSA_SHOP_ID и YUKASSA_SECRET для реальных платежей.
           </div>
         <?php endif; ?>
+
+        <!-- Контейнер виджета ЮKassa -->
+        <div id="yukassa-widget-wrap" style="display:none;margin-top:1rem">
+          <div id="payment-form"></div>
+          <button class="btn btn--ghost btn--sm" style="margin-top:.5rem;width:100%" onclick="closeTopupWidget()">
+            <?= icon('x', '', 13) ?> Отменить
+          </button>
+        </div>
 
         <div class="topup-presets">
           <?php foreach ([299, 699, 1000, 2000] as $preset): ?>
@@ -853,17 +848,82 @@ require __DIR__ . '/templates/navbar.php'; ?>
     setTimeout(() => el.remove(), 3500);
   }
 
-  // Демо пополнение (без ЮKassa)
-  async function topupWalletDemo() {
+  // Открыть виджет оплаты / демо-пополнение
+  async function openTopupWidget() {
     const amount = parseFloat(document.getElementById('topup-amount').value);
     if (!amount || amount <= 0) { billingToast('Введите сумму', 'err'); return; }
+
     const btn = document.querySelector('.wallet-topup .btn');
     if (btn) btn.disabled = true;
+
     try {
-      const r = await api('topup_wallet', { amount });
-      if (r.ok) { billingToast(`Счёт пополнен на ${amount} ₽`); location.reload(); }
-      else { billingToast(r.error || 'Ошибка', 'err'); if (btn) btn.disabled = false; }
-    } catch (e) { billingToast('Ошибка сети', 'err'); if (btn) btn.disabled = false; }
+      // Запросить токен у сервера
+      const r = await fetch('/payment.php?action=token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
+        body: JSON.stringify({ amount, csrf: CSRF_TOKEN }),
+      }).then(r => r.json());
+
+      if (!r.ok) {
+        // Если ЮKassa не настроена — демо-режим
+        if (r.error && r.error.includes('не настроена')) {
+          const dr = await api('topup_wallet', { amount });
+          if (dr.ok) { billingToast(`Счёт пополнен на ${amount} ₽ (демо)`); location.reload(); }
+          else billingToast(dr.error || 'Ошибка', 'err');
+        } else {
+          billingToast(r.error || 'Ошибка создания платежа', 'err');
+        }
+        if (btn) btn.disabled = false;
+        return;
+      }
+
+      // Показать виджет ЮKassa
+      const wrap = document.getElementById('yukassa-widget-wrap');
+      wrap.style.display = 'block';
+      document.getElementById('payment-form').innerHTML = '';
+
+      const checkout = new window.YooMoneyCheckoutWidget({
+        confirmation_token: r.token,
+        return_url: r.return_url,
+        customization: {
+          colors: { controlPrimary: '#d4a057' }
+        },
+        error_callback: function (error) {
+          billingToast('Ошибка виджета: ' + error.error, 'err');
+        }
+      });
+
+      checkout.render('payment-form');
+
+      // Проверять статус каждые 3 сек после рендера виджета
+      const checkInterval = setInterval(async () => {
+        const res = await fetch('/payment.php?action=check&payment_id=' + r.payment_id).then(r => r.json());
+        if (res.status === 'succeeded') {
+          clearInterval(checkInterval);
+          checkout.destroy();
+          closeTopupWidget();
+          billingToast(`Счёт пополнен на ${amount} ₽!`);
+          setTimeout(() => location.reload(), 1000);
+        } else if (res.status === 'canceled') {
+          clearInterval(checkInterval);
+          billingToast('Платёж отменён', 'err');
+          closeTopupWidget();
+        }
+      }, 3000);
+
+      // Остановить проверку через 20 мин
+      setTimeout(() => clearInterval(checkInterval), 1200000);
+
+    } catch (e) {
+      billingToast('Ошибка сети', 'err');
+    }
+    if (btn) btn.disabled = false;
+  }
+
+  function closeTopupWidget() {
+    const wrap = document.getElementById('yukassa-widget-wrap');
+    if (wrap) wrap.style.display = 'none';
+    document.getElementById('payment-form').innerHTML = '';
   }
 
   // Активация тарифа
@@ -940,4 +1000,5 @@ require __DIR__ . '/templates/navbar.php'; ?>
   });
 </script>
 
+<script src="https://yookassa.ru/checkout-widget/v1/checkout-widget.js"></script>
 <?php layout_end(); ?>

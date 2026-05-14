@@ -1,15 +1,12 @@
 <?php
 /**
  * payment.php
- * Point of Creation — интеграция ЮKassa (тестовый режим)
+ * Point of Creation — интеграция ЮKassa (embedded виджет)
  *
- * Документация: https://yookassa.ru/developers/api
- * Тестовые карты: https://yookassa.ru/developers/payment-acceptance/testing
- *
- * Переменные окружения (docker-compose.yml):
- *   YUKASSA_SHOP_ID   — ID магазина (из личного кабинета ЮKassa)
- *   YUKASSA_SECRET    — Секретный ключ (начинается с test_... в тестовом режиме)
- *   APP_URL           — Базовый URL приложения (например https://yourdomain.com)
+ * Переменные окружения:
+ *   YUKASSA_SHOP_ID  — ID магазина
+ *   YUKASSA_SECRET   — Секретный ключ (test_... для тестового режима)
+ *   APP_URL          — Базовый URL (для return_url)
  */
 
 require_once __DIR__ . '/core/auth.php';
@@ -17,21 +14,22 @@ require_once __DIR__ . '/core/billing_core.php';
 
 define('YUKASSA_SHOP_ID', getenv('YUKASSA_SHOP_ID') ?: '');
 define('YUKASSA_SECRET', getenv('YUKASSA_SECRET') ?: '');
-define('APP_URL', rtrim(getenv('APP_URL') ?: 'http://localhost:8080', '/'));
+define('APP_URL', rtrim(getenv('APP_URL') ?: 'http://localhost', '/'));
 
-// ══════════════════════════════════════════════════════════════
-//  API-обёртка ЮKassa
-// ══════════════════════════════════════════════════════════════
+// ── API-запрос к ЮKassa ───────────────────────────────────────
 
 function yukassa_request(string $method, string $endpoint, array $data = [], string $idempotency_key = ''): array
 {
+  if (!YUKASSA_SHOP_ID || !YUKASSA_SECRET) {
+    return ['_error' => 'not_configured'];
+  }
+
   $url = 'https://api.yookassa.ru/v3/' . $endpoint;
   $ch = curl_init($url);
 
   $headers = ['Content-Type: application/json'];
-  if ($idempotency_key) {
-    $headers[] = 'Idempotency-Key: ' . $idempotency_key;
-  }
+  if ($idempotency_key)
+    $headers[] = 'Idempotence-Key: ' . $idempotency_key;
 
   curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => true,
@@ -39,93 +37,95 @@ function yukassa_request(string $method, string $endpoint, array $data = [], str
     CURLOPT_HTTPHEADER => $headers,
     CURLOPT_USERPWD => YUKASSA_SHOP_ID . ':' . YUKASSA_SECRET,
     CURLOPT_TIMEOUT => 30,
+    CURLOPT_SSL_VERIFYPEER => true,
   ]);
 
-  if ($data) {
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-  }
+  if ($data)
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data, JSON_UNESCAPED_UNICODE));
 
   $response = curl_exec($ch);
-  $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+  $errno = curl_errno($ch);
+  $error = curl_error($ch);
   curl_close($ch);
 
-  if ($response === false) {
-    return ['error' => 'Ошибка соединения с ЮKassa'];
-  }
+  if ($errno)
+    return ['_error' => 'curl', '_msg' => $error];
 
   $decoded = json_decode($response, true);
-  return $decoded ?: ['error' => 'Некорректный ответ ЮKassa'];
+  return $decoded ?: ['_error' => 'invalid_json', '_raw' => $response];
 }
 
-// ══════════════════════════════════════════════════════════════
-//  Создать платёж
-// ══════════════════════════════════════════════════════════════
+// ── Роутер ────────────────────────────────────────────────────
 
-function create_payment(int $user_id, float $amount, string $description, string $return_url): array
-{
-  if (!YUKASSA_SHOP_ID || !YUKASSA_SECRET) {
-    return ['ok' => false, 'error' => 'ЮKassa не настроена. Задайте YUKASSA_SHOP_ID и YUKASSA_SECRET.'];
+$action = $_GET['action'] ?? $_POST['action'] ?? '';
+
+// ── action=token — создать платёж и вернуть confirmation_token ─
+if ($action === 'token' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+  header('Content-Type: application/json; charset=utf-8');
+  require_auth();
+
+  $raw = json_decode(file_get_contents('php://input'), true) ?? [];
+  $csrf = $raw['csrf'] ?? $_POST['csrf'] ?? '';
+  if (!verify_csrf($csrf)) {
+    echo json_encode(['ok' => false, 'error' => 'Invalid CSRF']);
+    exit;
   }
+
+  $amount = round((float) ($raw['amount'] ?? 0), 2);
+  $user_id = (int) current_user()['id'];
 
   if ($amount < 1) {
-    return ['ok' => false, 'error' => 'Минимальная сумма платежа: 1 ₽'];
+    echo json_encode(['ok' => false, 'error' => 'Минимальная сумма: 1 ₽']);
+    exit;
+  }
+  if ($amount > 100000) {
+    echo json_encode(['ok' => false, 'error' => 'Максимальная сумма: 100 000 ₽']);
+    exit;
   }
 
-  $idempotency_key = 'poc-' . $user_id . '-' . time();
+  $return_url = APP_URL . '/billing.php?msg=payment_success';
 
   $result = yukassa_request('POST', 'payments', [
-    'amount' => [
-      'value' => number_format($amount, 2, '.', ''),
-      'currency' => 'RUB',
-    ],
+    'amount' => ['value' => number_format($amount, 2, '.', ''), 'currency' => 'RUB'],
     'capture' => true,
-    'confirmation' => [
-      'type' => 'redirect',
-      'return_url' => $return_url,
-    ],
-    'description' => $description,
-    'metadata' => [
-      'user_id' => $user_id,
-      'type' => 'topup',
-    ],
-  ], $idempotency_key);
+    'confirmation' => ['type' => 'embedded'],
+    'description' => "Пополнение счёта Point of Creation на {$amount} ₽",
+    'metadata' => ['user_id' => $user_id, 'type' => 'topup'],
+  ], 'poc-' . $user_id . '-' . time());
 
-  if (isset($result['id'])) {
-    // Сохранить платёж в БД
-    $db = get_db();
-    $db->prepare("
-            INSERT INTO `payments`
-                (`user_id`, `payment_id`, `amount`, `status`, `description`)
-            VALUES (?, ?, ?, 'pending', ?)
-        ")->execute([$user_id, $result['id'], $amount, $description]);
-
-    // ЮKassa может вернуть confirmation_url в разных полях в зависимости от типа
-    $conf_url = $result['confirmation']['confirmation_url']
-      ?? $result['confirmation']['confirm_url']
-      ?? '';
-
-    return [
-      'ok' => true,
-      'payment_id' => $result['id'],
-      'confirmation_url' => $conf_url,
-      '_debug_full' => $result, // полный ответ для отладки
-    ];
+  if (isset($result['_error'])) {
+    $msg = $result['_error'] === 'not_configured'
+      ? 'ЮKassa не настроена (задайте YUKASSA_SHOP_ID и YUKASSA_SECRET)'
+      : 'Ошибка соединения с ЮKassa: ' . ($result['_msg'] ?? $result['_error']);
+    echo json_encode(['ok' => false, 'error' => $msg]);
+    exit;
   }
 
-  return [
-    'ok' => false,
-    'error' => $result['description'] ?? ($result['message'] ?? 'Ошибка создания платежа'),
-    '_debug' => $result, // временно для отладки
-  ];
+  if (!isset($result['id'])) {
+    echo json_encode(['ok' => false, 'error' => $result['description'] ?? 'Ошибка ЮKassa', '_debug' => $result]);
+    exit;
+  }
+
+  // Сохранить платёж в БД
+  try {
+    $db = get_db();
+    $db->prepare("INSERT INTO `payments` (`user_id`,`payment_id`,`amount`,`status`,`description`) VALUES (?,?,?,'pending',?)")
+      ->execute([$user_id, $result['id'], $amount, "Пополнение через ЮKassa"]);
+  } catch (Throwable $e) {
+  }
+
+  $token = $result['confirmation']['confirmation_token'] ?? '';
+  echo json_encode([
+    'ok' => true,
+    'token' => $token,
+    'payment_id' => $result['id'],
+    'return_url' => $return_url,
+  ]);
+  exit;
 }
 
-// ══════════════════════════════════════════════════════════════
-//  Webhook — ЮKassa уведомляет нас о статусе платежа
-//  URL: POST /payment.php?action=webhook
-// ══════════════════════════════════════════════════════════════
-
-function handle_webhook(): void
-{
+// ── action=webhook — ЮKassa уведомляет о статусе платежа ──────
+if ($action === 'webhook') {
   $raw = file_get_contents('php://input');
   $data = json_decode($raw, true);
 
@@ -134,18 +134,15 @@ function handle_webhook(): void
     exit;
   }
 
-  $event = $data['event'];
-  $payment = $data['object'];
-
-  if ($event !== 'payment.succeeded') {
+  if ($data['event'] !== 'payment.succeeded') {
     http_response_code(200);
-    exit; // Остальные события игнорируем
+    exit;
   }
 
+  $payment = $data['object'];
   $payment_id = $payment['id'];
   $amount = (float) ($payment['amount']['value'] ?? 0);
-  $meta = $payment['metadata'] ?? [];
-  $user_id = (int) ($meta['user_id'] ?? 0);
+  $user_id = (int) ($payment['metadata']['user_id'] ?? 0);
 
   if (!$user_id || !$payment_id) {
     http_response_code(400);
@@ -153,26 +150,19 @@ function handle_webhook(): void
   }
 
   $db = get_db();
-
-  // Проверить что платёж ещё не обработан
   $stmt = $db->prepare("SELECT `status` FROM `payments` WHERE `payment_id` = ?");
   $stmt->execute([$payment_id]);
   $row = $stmt->fetch();
 
   if (!$row || $row['status'] === 'succeeded') {
     http_response_code(200);
-    exit; // Уже обработан или не найден
+    exit;
   }
 
   $db->beginTransaction();
   try {
-    // Обновить статус платежа
-    $db->prepare("UPDATE `payments` SET `status`='succeeded' WHERE `payment_id`=?")
-      ->execute([$payment_id]);
-
-    // Пополнить кошелёк
+    $db->prepare("UPDATE `payments` SET `status`='succeeded' WHERE `payment_id`=?")->execute([$payment_id]);
     topup_wallet($user_id, $amount, "Пополнение через ЮKassa (#{$payment_id})");
-
     $db->commit();
     http_response_code(200);
   } catch (Throwable $e) {
@@ -182,87 +172,33 @@ function handle_webhook(): void
   exit;
 }
 
-// ══════════════════════════════════════════════════════════════
-//  Обработка return_url — пользователь вернулся с оплаты
-//  URL: GET /payment.php?action=return&payment_id=...
-// ══════════════════════════════════════════════════════════════
-
-function handle_return(): void
-{
+// ── action=check — проверить статус платежа (резервный путь) ──
+if ($action === 'check' && isset($_GET['payment_id'])) {
+  header('Content-Type: application/json; charset=utf-8');
   require_auth();
-  $payment_id = $_GET['payment_id'] ?? '';
 
-  if (!$payment_id) {
-    header('Location: /billing.php?msg=payment_error');
-    exit;
-  }
-
-  // Проверить статус платежа через API
+  $payment_id = $_GET['payment_id'];
   $result = yukassa_request('GET', 'payments/' . $payment_id);
+  $status = $result['status'] ?? 'unknown';
+  $user_id = (int) current_user()['id'];
 
-  if (($result['status'] ?? '') === 'succeeded') {
-    // Платёж может уже быть обработан вебхуком — проверим
+  if ($status === 'succeeded') {
     $db = get_db();
-    $stmt = $db->prepare("SELECT `status` FROM `payments` WHERE `payment_id` = ?");
-    $stmt->execute([$payment_id]);
+    $stmt = $db->prepare("SELECT `status` FROM `payments` WHERE `payment_id` = ? AND `user_id` = ?");
+    $stmt->execute([$payment_id, $user_id]);
     $row = $stmt->fetch();
 
     if ($row && $row['status'] !== 'succeeded') {
-      // Обработать если вебхук не пришёл (резервный путь)
       $amount = (float) ($result['amount']['value'] ?? 0);
-      $user_id = (int) (current_user()['id'] ?? 0);
       $db->prepare("UPDATE `payments` SET `status`='succeeded' WHERE `payment_id`=?")->execute([$payment_id]);
       topup_wallet($user_id, $amount, "Пополнение через ЮKassa (#{$payment_id})");
     }
-    header('Location: /billing.php?msg=payment_success');
+    echo json_encode(['ok' => true, 'status' => 'succeeded']);
   } else {
-    header('Location: /billing.php?msg=payment_failed');
+    echo json_encode(['ok' => true, 'status' => $status]);
   }
   exit;
 }
 
-// ══════════════════════════════════════════════════════════════
-//  Роутер
-// ══════════════════════════════════════════════════════════════
-
-$action = $_GET['action'] ?? $_POST['action'] ?? '';
-
-if ($action === 'webhook') {
-  handle_webhook();
-} elseif ($action === 'return') {
-  handle_return();
-} elseif ($action === 'create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-  require_auth();
-  header('Content-Type: application/json');
-
-  if (!verify_csrf($_POST['csrf'] ?? '')) {
-    echo json_encode(['ok' => false, 'error' => 'Invalid CSRF']);
-    exit;
-  }
-
-  $amount = (float) ($_POST['amount'] ?? 0);
-  $user_id = (int) (current_user()['id'] ?? 0);
-  // ЮKassa требует публичный HTTPS URL (не localhost)
-  // Если APP_URL = localhost — предупредить пользователя
-  if (strpos(APP_URL, 'localhost') !== false || strpos(APP_URL, '127.0.0.1') !== false) {
-    echo json_encode([
-      'ok' => false,
-      'error' => 'ЮKassa не поддерживает localhost. Задайте публичный URL в APP_URL (docker-compose.yml). Для тестирования используйте ngrok: https://ngrok.com',
-    ]);
-    exit;
-  }
-  $return_url = APP_URL . '/payment.php?action=return';
-
-  $result = create_payment($user_id, $amount, "Пополнение счёта Point of Creation", $return_url);
-
-  if ($result['ok'] && !empty($result['confirmation_url'])) {
-    // Редиректить на страницу оплаты ЮKassa
-    header('Location: ' . $result['confirmation_url']);
-    exit;
-  }
-
-  echo json_encode($result);
-} else {
-  http_response_code(404);
-  echo 'Not found';
-}
+http_response_code(404);
+echo 'Not found';
