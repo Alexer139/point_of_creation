@@ -49,8 +49,8 @@ if (!is_logged_in()) {
 }
 
 $csrf_header = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
-$body        = json_decode(file_get_contents('php://input'), true) ?? [];
-$csrf_body   = $body['csrf'] ?? '';
+$body = json_decode(file_get_contents('php://input'), true) ?? [];
+$csrf_body = $body['csrf'] ?? '';
 
 if (!verify_csrf($csrf_header) && !verify_csrf($csrf_body)) {
     http_response_code(403);
@@ -58,12 +58,15 @@ if (!verify_csrf($csrf_header) && !verify_csrf($csrf_body)) {
     exit;
 }
 
-$action  = $body['action'] ?? '';
+$action = $body['action'] ?? '';
 $user_id = (int) current_user()['id'];
-$db      = get_db();
+$db = get_db();
 
 // Проверить истечение подписки при каждом запросе
-try { check_and_apply_expiry($user_id); } catch (Throwable $e) {}
+try {
+    check_and_apply_expiry($user_id);
+} catch (Throwable $e) {
+}
 
 // ────────────────────────────────────────────────────────────────
 //  Helpers
@@ -74,10 +77,10 @@ try { check_and_apply_expiry($user_id); } catch (Throwable $e) {}
 //  Создать уведомление
 // ──────────────────────────────────────────────────────────────
 function create_notification(
-    PDO    $db,
-    int    $target_user_id,
+    PDO $db,
+    int $target_user_id,
     string $type,              // invited | role_changed | removed
-    int    $dashboard_id,
+    int $dashboard_id,
     string $dashboard_name,
     string $actor_name,
     string $role = ''
@@ -92,17 +95,19 @@ function create_notification(
 function get_dashboard_owner(int $dashboard_id): ?int
 {
     static $cache = [];
-    if (isset($cache[$dashboard_id])) return $cache[$dashboard_id];
+    if (isset($cache[$dashboard_id]))
+        return $cache[$dashboard_id];
     $s = get_db()->prepare("SELECT `owner_id` FROM `dashboards` WHERE `id` = ?");
     $s->execute([$dashboard_id]);
     $row = $s->fetch();
-    $cache[$dashboard_id] = $row ? (int)$row['owner_id'] : null;
+    $cache[$dashboard_id] = $row ? (int) $row['owner_id'] : null;
     return $cache[$dashboard_id];
 }
 
 function clean_json(mixed $raw): string
 {
-    if (is_array($raw))  return json_encode($raw, JSON_UNESCAPED_UNICODE);
+    if (is_array($raw))
+        return json_encode($raw, JSON_UNESCAPED_UNICODE);
     if (is_string($raw)) {
         $decoded = json_decode($raw, true);
         return $decoded !== null ? json_encode($decoded, JSON_UNESCAPED_UNICODE) : '{}';
@@ -129,8 +134,11 @@ try {
                 $d['page_count'] = (int) $stmt->fetchColumn();
                 $d['id'] = (int) $d['id'];
                 // Флаг заморозки
-                try { $d['is_locked'] = (int)$d['my_role'] === 'owner' ? (int)is_dashboard_locked((int)$d['id'], $user_id) : 0; }
-                catch (Throwable $e) { $d['is_locked'] = 0; }
+                try {
+                    $d['is_locked'] = (int) $d['my_role'] === 'owner' ? (int) is_dashboard_locked((int) $d['id'], $user_id) : 0;
+                } catch (Throwable $e) {
+                    $d['is_locked'] = 0;
+                }
             }
             unset($d);
             echo json_encode(['ok' => true, 'dashboards' => $dashboards]);
@@ -138,10 +146,18 @@ try {
         }
 
         case 'create_dashboard': {
-            try { $lc=can_create_dashboard($user_id); } catch(Throwable $e) { $lc=['ok'=>true]; }
-            if(!$lc['ok']){http_response_code(402);echo json_encode(['ok'=>false,'error'=>$lc['error'],'upgrade'=>true]);break;}
-            $name      = substr(trim($body['name'] ?? 'Новый дашборд'), 0, 120);
-            $is_shared = (int)(bool)($body['is_shared'] ?? false);
+            try {
+                $lc = can_create_dashboard($user_id);
+            } catch (Throwable $e) {
+                $lc = ['ok' => true];
+            }
+            if (!$lc['ok']) {
+                http_response_code(402);
+                echo json_encode(['ok' => false, 'error' => $lc['error'], 'upgrade' => true]);
+                break;
+            }
+            $name = substr(trim($body['name'] ?? 'Новый дашборд'), 0, 120);
+            $is_shared = (int) (bool) ($body['is_shared'] ?? false);
 
             if ($name === '') {
                 $name = 'Новый дашборд';
@@ -167,16 +183,16 @@ try {
             $db->commit();
 
             echo json_encode([
-                'ok'           => true,
+                'ok' => true,
                 'dashboard_id' => $dashboard_id,
-                'page_id'      => $page_id,
+                'page_id' => $page_id,
             ]);
             break;
         }
 
         case 'rename_dashboard': {
-            $dashboard_id = (int)($body['id'] ?? 0);
-            $name         = substr(trim($body['name'] ?? ''), 0, 120);
+            $dashboard_id = (int) ($body['id'] ?? 0);
+            $name = substr(trim($body['name'] ?? ''), 0, 120);
 
             if ($dashboard_id < 1 || $name === '') {
                 http_response_code(400);
@@ -187,14 +203,14 @@ try {
             require_dashboard_owner($dashboard_id, $user_id);
 
             $db->prepare("UPDATE `dashboards` SET `name` = ? WHERE `id` = ?")
-               ->execute([$name, $dashboard_id]);
+                ->execute([$name, $dashboard_id]);
 
             echo json_encode(['ok' => true]);
             break;
         }
 
         case 'delete_dashboard': {
-            $dashboard_id = (int)($body['id'] ?? 0);
+            $dashboard_id = (int) ($body['id'] ?? 0);
 
             if ($dashboard_id < 1) {
                 http_response_code(400);
@@ -222,7 +238,7 @@ try {
             }
 
             $db->prepare("DELETE FROM `dashboards` WHERE `id` = ? AND `owner_id` = ?")
-               ->execute([$dashboard_id, $user_id]);
+                ->execute([$dashboard_id, $user_id]);
 
             echo json_encode(['ok' => true]);
             break;
@@ -233,8 +249,8 @@ try {
         // ════════════════════════════════════════════════════════
 
         case 'create_page': {
-            $dashboard_id = (int)($body['dashboard_id'] ?? 0);
-            $name         = substr(trim($body['name'] ?? 'Страница'), 0, 120);
+            $dashboard_id = (int) ($body['dashboard_id'] ?? 0);
+            $name = substr(trim($body['name'] ?? 'Страница'), 0, 120);
 
             if ($dashboard_id < 1) {
                 http_response_code(400);
@@ -244,9 +260,25 @@ try {
 
             // Проверяем права: только owner или editor могут создавать страницы
             require_dashboard_edit($dashboard_id, $user_id);
-            try { $o=get_dashboard_owner($dashboard_id); if($o&&is_dashboard_locked($dashboard_id,$o)){http_response_code(403);echo json_encode(['ok'=>false,'error'=>'Дашборд заморожен','locked'=>true]);break;} } catch(Throwable $e) {}
-            try { $pl=can_create_page($dashboard_id,$user_id); } catch(Throwable $e) { $pl=['ok'=>true]; }
-            if(!$pl['ok']){http_response_code(402);echo json_encode(['ok'=>false,'error'=>$pl['error'],'upgrade'=>true]);break;}
+            try {
+                $o = get_dashboard_owner($dashboard_id);
+                if ($o && is_dashboard_locked($dashboard_id, $o)) {
+                    http_response_code(403);
+                    echo json_encode(['ok' => false, 'error' => 'Дашборд заморожен', 'locked' => true]);
+                    break;
+                }
+            } catch (Throwable $e) {
+            }
+            try {
+                $pl = can_create_page($dashboard_id, $user_id);
+            } catch (Throwable $e) {
+                $pl = ['ok' => true];
+            }
+            if (!$pl['ok']) {
+                http_response_code(402);
+                echo json_encode(['ok' => false, 'error' => $pl['error'], 'upgrade' => true]);
+                break;
+            }
 
             // Получить следующий order_index
             $stmt = $db->prepare("
@@ -265,17 +297,17 @@ try {
             $page_id = (int) $db->lastInsertId();
 
             echo json_encode([
-                'ok'          => true,
-                'page_id'     => $page_id,
-                'name'        => $name,
+                'ok' => true,
+                'page_id' => $page_id,
+                'name' => $name,
                 'order_index' => $next_order,
             ]);
             break;
         }
 
         case 'rename_page': {
-            $page_id = (int)($body['id'] ?? 0);
-            $name    = substr(trim($body['name'] ?? ''), 0, 120);
+            $page_id = (int) ($body['id'] ?? 0);
+            $name = substr(trim($body['name'] ?? ''), 0, 120);
 
             if ($page_id < 1 || $name === '') {
                 http_response_code(400);
@@ -293,14 +325,14 @@ try {
             require_dashboard_edit($dashboard_id, $user_id);
 
             $db->prepare("UPDATE `pages` SET `name` = ? WHERE `id` = ?")
-               ->execute([$name, $page_id]);
+                ->execute([$name, $page_id]);
 
             echo json_encode(['ok' => true]);
             break;
         }
 
         case 'delete_page': {
-            $page_id = (int)($body['id'] ?? 0);
+            $page_id = (int) ($body['id'] ?? 0);
 
             if ($page_id < 1) {
                 http_response_code(400);
@@ -320,7 +352,7 @@ try {
             // Нельзя удалить последнюю страницу
             $stmt = $db->prepare("SELECT COUNT(*) FROM `pages` WHERE `dashboard_id` = ?");
             $stmt->execute([$dashboard_id]);
-            if ((int)$stmt->fetchColumn() <= 1) {
+            if ((int) $stmt->fetchColumn() <= 1) {
                 http_response_code(400);
                 echo json_encode(['ok' => false, 'error' => 'Нельзя удалить единственную страницу дашборда']);
                 break;
@@ -333,8 +365,8 @@ try {
         }
 
         case 'reorder_pages': {
-            $dashboard_id = (int)($body['dashboard_id'] ?? 0);
-            $page_ids     = $body['page_ids'] ?? [];
+            $dashboard_id = (int) ($body['dashboard_id'] ?? 0);
+            $page_ids = $body['page_ids'] ?? [];
 
             if ($dashboard_id < 1 || !is_array($page_ids)) {
                 http_response_code(400);
@@ -349,7 +381,7 @@ try {
                 $db->prepare("
                     UPDATE `pages` SET `order_index` = ?
                     WHERE `id` = ? AND `dashboard_id` = ?
-                ")->execute([(int)$idx, (int)$pid, $dashboard_id]);
+                ")->execute([(int) $idx, (int) $pid, $dashboard_id]);
             }
             $db->commit();
 
@@ -362,16 +394,16 @@ try {
         // ════════════════════════════════════════════════════════
 
         case 'save_widget': {
-            $page_id       = (int)($body['page_id'] ?? 0);
-            $widget_id     = (int)($body['id'] ?? 0);
-            $type          = substr(trim($body['type'] ?? 'note'), 0, 32);
-            $title         = substr(trim($body['title'] ?? ''), 0, 120);
+            $page_id = (int) ($body['page_id'] ?? 0);
+            $widget_id = (int) ($body['id'] ?? 0);
+            $type = substr(trim($body['type'] ?? 'note'), 0, 32);
+            $title = substr(trim($body['title'] ?? ''), 0, 120);
             $settings_json = clean_json($body['settings_json'] ?? $body['content'] ?? '{}');
             $position_data = clean_json([
-                'w'          => max(1, min(4, (int)($body['position_w'] ?? 1))),
-                'h'          => max(1, min(3, (int)($body['position_h'] ?? 1))),
-                'h_px'       => max(0, (int)($body['position_h_px'] ?? 0)),
-                'sort_order' => (int)($body['sort_order'] ?? 0),
+                'w' => max(1, min(4, (int) ($body['position_w'] ?? 1))),
+                'h' => max(1, min(3, (int) ($body['position_h'] ?? 1))),
+                'h_px' => max(0, (int) ($body['position_h_px'] ?? 0)),
+                'sort_order' => (int) ($body['sort_order'] ?? 0),
             ]);
 
             if ($widget_id > 0) {
@@ -383,7 +415,15 @@ try {
                     break;
                 }
                 require_dashboard_edit($dashboard_id, $user_id);
-                try { $o=get_dashboard_owner($dashboard_id); if($o&&is_dashboard_locked($dashboard_id,$o)){http_response_code(403);echo json_encode(['ok'=>false,'error'=>'Дашборд заморожен','locked'=>true]);break;} } catch(Throwable $e) {}
+                try {
+                    $o = get_dashboard_owner($dashboard_id);
+                    if ($o && is_dashboard_locked($dashboard_id, $o)) {
+                        http_response_code(403);
+                        echo json_encode(['ok' => false, 'error' => 'Дашборд заморожен', 'locked' => true]);
+                        break;
+                    }
+                } catch (Throwable $e) {
+                }
 
                 $db->prepare("
                     UPDATE `widgets`
@@ -418,7 +458,7 @@ try {
         }
 
         case 'delete_widget': {
-            $widget_id = (int)($body['id'] ?? 0);
+            $widget_id = (int) ($body['id'] ?? 0);
 
             if ($widget_id < 1) {
                 http_response_code(400);
@@ -434,7 +474,15 @@ try {
             }
 
             require_dashboard_edit($dashboard_id, $user_id);
-            try { $o=get_dashboard_owner($dashboard_id); if($o&&is_dashboard_locked($dashboard_id,$o)){http_response_code(403);echo json_encode(['ok'=>false,'error'=>'Дашборд заморожен','locked'=>true]);break;} } catch(Throwable $e) {}
+            try {
+                $o = get_dashboard_owner($dashboard_id);
+                if ($o && is_dashboard_locked($dashboard_id, $o)) {
+                    http_response_code(403);
+                    echo json_encode(['ok' => false, 'error' => 'Дашборд заморожен', 'locked' => true]);
+                    break;
+                }
+            } catch (Throwable $e) {
+            }
 
             $db->prepare("DELETE FROM `widgets` WHERE `id` = ?")->execute([$widget_id]);
 
@@ -443,9 +491,9 @@ try {
         }
 
         case 'update_content': {
-            $widget_id     = (int)($body['id'] ?? 0);
+            $widget_id = (int) ($body['id'] ?? 0);
             $settings_json = clean_json($body['settings_json'] ?? $body['content'] ?? '{}');
-            $title         = isset($body['title']) ? substr(trim($body['title']), 0, 120) : null;
+            $title = isset($body['title']) ? substr(trim($body['title']), 0, 120) : null;
 
             if ($widget_id < 1) {
                 http_response_code(400);
@@ -477,7 +525,7 @@ try {
         }
 
         case 'save_all': {
-            $page_id  = (int)($body['page_id'] ?? 0);
+            $page_id = (int) ($body['page_id'] ?? 0);
             $incoming = $body['widgets'] ?? [];
 
             if ($page_id < 1) {
@@ -494,7 +542,15 @@ try {
             }
 
             require_dashboard_edit($dashboard_id, $user_id);
-            try { $o=get_dashboard_owner($dashboard_id); if($o&&is_dashboard_locked($dashboard_id,$o)){http_response_code(403);echo json_encode(['ok'=>false,'error'=>'Дашборд заморожен','locked'=>true]);break;} } catch(Throwable $e) {}
+            try {
+                $o = get_dashboard_owner($dashboard_id);
+                if ($o && is_dashboard_locked($dashboard_id, $o)) {
+                    http_response_code(403);
+                    echo json_encode(['ok' => false, 'error' => 'Дашборд заморожен', 'locked' => true]);
+                    break;
+                }
+            } catch (Throwable $e) {
+            }
 
             if (!is_array($incoming)) {
                 http_response_code(400);
@@ -507,17 +563,17 @@ try {
             $stmt = $db->prepare("SELECT `id` FROM `widgets` WHERE `page_id` = ?");
             $stmt->execute([$page_id]);
             $existing_ids = array_column($stmt->fetchAll(), 'id');
-            $seen_ids     = [];
+            $seen_ids = [];
 
             foreach ($incoming as $idx => $w) {
-                $wid           = (int)($w['id'] ?? 0);
-                $type          = substr(trim($w['type']  ?? 'note'), 0, 32);
-                $title         = substr(trim($w['title'] ?? ''),     0, 120);
+                $wid = (int) ($w['id'] ?? 0);
+                $type = substr(trim($w['type'] ?? 'note'), 0, 32);
+                $title = substr(trim($w['title'] ?? ''), 0, 120);
                 $settings_json = clean_json($w['settings_json'] ?? $w['content'] ?? '{}');
                 $position_data = clean_json([
-                    'w'          => max(1, min(4, (int)($w['position_w'] ?? $w['w'] ?? 1))),
-                    'h'          => max(1, min(3, (int)($w['position_h'] ?? $w['h'] ?? 1))),
-                    'h_px'       => max(0, (int)($w['position_h_px'] ?? 0)),
+                    'w' => max(1, min(4, (int) ($w['position_w'] ?? $w['w'] ?? 1))),
+                    'h' => max(1, min(3, (int) ($w['position_h'] ?? $w['h'] ?? 1))),
+                    'h_px' => max(0, (int) ($w['position_h_px'] ?? 0)),
                     'sort_order' => $idx,
                 ]);
 
@@ -553,9 +609,9 @@ try {
         // ════════════════════════════════════════════════════════
 
         case 'invite_user': {
-            $dashboard_id = (int)($body['dashboard_id'] ?? 0);
-            $email        = trim($body['email'] ?? '');
-            $role         = $body['role'] ?? 'viewer';
+            $dashboard_id = (int) ($body['dashboard_id'] ?? 0);
+            $email = trim($body['email'] ?? '');
+            $role = $body['role'] ?? 'viewer';
 
             if ($dashboard_id < 1 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 http_response_code(400);
@@ -581,7 +637,7 @@ try {
                 break;
             }
 
-            if ((int)$invitee['id'] === $user_id) {
+            if ((int) $invitee['id'] === $user_id) {
                 http_response_code(400);
                 echo json_encode(['ok' => false, 'error' => 'Нельзя пригласить самого себя']);
                 break;
@@ -592,11 +648,11 @@ try {
                 INSERT INTO `dashboard_access` (`dashboard_id`, `user_id`, `role`)
                 VALUES (?, ?, ?)
                 ON DUPLICATE KEY UPDATE `role` = VALUES(`role`)
-            ")->execute([$dashboard_id, (int)$invitee['id'], $role]);
+            ")->execute([$dashboard_id, (int) $invitee['id'], $role]);
 
             // Пометить дашборд как shared
             $db->prepare("UPDATE `dashboards` SET `is_shared` = 1 WHERE `id` = ?")
-               ->execute([$dashboard_id]);
+                ->execute([$dashboard_id]);
 
             // Получить название дашборда
             $dname = $db->prepare("SELECT `name` FROM `dashboards` WHERE `id` = ?");
@@ -607,7 +663,7 @@ try {
             // Уведомление приглашённому
             create_notification(
                 $db,
-                (int)$invitee['id'],
+                (int) $invitee['id'],
                 'invited',
                 $dashboard_id,
                 $dashboard_name,
@@ -616,16 +672,16 @@ try {
             );
 
             echo json_encode([
-                'ok'       => true,
+                'ok' => true,
                 'username' => $invitee['username'],
-                'role'     => $role,
+                'role' => $role,
             ]);
             break;
         }
 
         case 'remove_access': {
-            $dashboard_id  = (int)($body['dashboard_id'] ?? 0);
-            $target_user   = (int)($body['user_id'] ?? 0);
+            $dashboard_id = (int) ($body['dashboard_id'] ?? 0);
+            $target_user = (int) ($body['user_id'] ?? 0);
 
             if ($dashboard_id < 1 || $target_user < 1) {
                 http_response_code(400);
@@ -643,9 +699,9 @@ try {
             // Если больше никого нет — сбросить is_shared
             $stmt = $db->prepare("SELECT COUNT(*) FROM `dashboard_access` WHERE `dashboard_id` = ?");
             $stmt->execute([$dashboard_id]);
-            if ((int)$stmt->fetchColumn() === 0) {
+            if ((int) $stmt->fetchColumn() === 0) {
                 $db->prepare("UPDATE `dashboards` SET `is_shared` = 0 WHERE `id` = ?")
-                   ->execute([$dashboard_id]);
+                    ->execute([$dashboard_id]);
             }
 
             // Уведомление удалённому пользователю
@@ -668,7 +724,7 @@ try {
         }
 
         case 'list_access': {
-            $dashboard_id = (int)($body['dashboard_id'] ?? 0);
+            $dashboard_id = (int) ($body['dashboard_id'] ?? 0);
 
             if ($dashboard_id < 1) {
                 http_response_code(400);
@@ -689,7 +745,7 @@ try {
             $members = $stmt->fetchAll();
 
             foreach ($members as &$m) {
-                $m['id'] = (int)$m['id'];
+                $m['id'] = (int) $m['id'];
             }
             unset($m);
 
@@ -698,11 +754,11 @@ try {
         }
 
         case 'change_access_role': {
-            $dashboard_id = (int)($body['dashboard_id'] ?? 0);
-            $target_user  = (int)($body['user_id'] ?? 0);
-            $role         = $body['role'] ?? '';
+            $dashboard_id = (int) ($body['dashboard_id'] ?? 0);
+            $target_user = (int) ($body['user_id'] ?? 0);
+            $role = $body['role'] ?? '';
 
-            if ($dashboard_id < 1 || $target_user < 1 || !in_array($role, ['viewer','editor'], true)) {
+            if ($dashboard_id < 1 || $target_user < 1 || !in_array($role, ['viewer', 'editor'], true)) {
                 http_response_code(400);
                 echo json_encode(['ok' => false, 'error' => 'Неверные параметры']);
                 break;
@@ -740,7 +796,7 @@ try {
         // ════════════════════════════════════════════════════════
 
         case 'switch_dashboard': {
-            $dashboard_id = (int)($body['dashboard_id'] ?? 0);
+            $dashboard_id = (int) ($body['dashboard_id'] ?? 0);
 
             if ($dashboard_id < 1) {
                 http_response_code(400);
@@ -758,7 +814,8 @@ try {
                     echo json_encode(['ok' => false, 'error' => 'Этот дашборд заморожен. Обновите тариф или выберите другие активные дашборды.', 'locked' => true]);
                     break;
                 }
-            } catch (Throwable $e) { /* таблица ещё не создана */ }
+            } catch (Throwable $e) { /* таблица ещё не создана */
+            }
 
             // Найти первую страницу дашборда
             $stmt = $db->prepare("
@@ -771,18 +828,18 @@ try {
             $page = $stmt->fetch();
 
             $_SESSION['active_dashboard_id'] = $dashboard_id;
-            $_SESSION['active_page_id']      = $page ? (int)$page['id'] : null;
+            $_SESSION['active_page_id'] = $page ? (int) $page['id'] : null;
 
             echo json_encode([
-                'ok'           => true,
+                'ok' => true,
                 'dashboard_id' => $dashboard_id,
-                'page_id'      => $_SESSION['active_page_id'],
+                'page_id' => $_SESSION['active_page_id'],
             ]);
             break;
         }
 
         case 'switch_page': {
-            $page_id = (int)($body['page_id'] ?? 0);
+            $page_id = (int) ($body['page_id'] ?? 0);
 
             if ($page_id < 1) {
                 http_response_code(400);
@@ -798,6 +855,17 @@ try {
             }
 
             require_dashboard_view($dashboard_id, $user_id);
+
+            // Проверить заморозку страницы
+            try {
+                $page_owner = get_dashboard_owner($dashboard_id);
+                if ($page_owner && is_page_locked($page_id, $page_owner)) {
+                    http_response_code(403);
+                    echo json_encode(['ok' => false, 'error' => 'Эта страница заморожена', 'page_locked' => true]);
+                    break;
+                }
+            } catch (Throwable $e) {
+            }
 
             $_SESSION['active_page_id'] = $page_id;
 
@@ -824,10 +892,11 @@ try {
 
             $unread = 0;
             foreach ($notifs as &$n) {
-                $n['id'] = (int)$n['id'];
-                $n['dashboard_id'] = (int)$n['dashboard_id'];
-                $n['is_read'] = (bool)$n['is_read'];
-                if (!$n['is_read']) $unread++;
+                $n['id'] = (int) $n['id'];
+                $n['dashboard_id'] = (int) $n['dashboard_id'];
+                $n['is_read'] = (bool) $n['is_read'];
+                if (!$n['is_read'])
+                    $unread++;
             }
             unset($n);
 
@@ -839,22 +908,22 @@ try {
             $ids = $body['ids'] ?? [];
             if ($ids === 'all') {
                 $db->prepare("UPDATE `notifications` SET `is_read` = 1 WHERE `user_id` = ?")
-                   ->execute([$user_id]);
+                    ->execute([$user_id]);
             } elseif (is_array($ids) && count($ids)) {
                 $ph = implode(',', array_fill(0, count($ids), '?'));
                 $params = array_merge(array_map('intval', $ids), [$user_id]);
                 $db->prepare("UPDATE `notifications` SET `is_read` = 1 WHERE `id` IN ($ph) AND `user_id` = ?")
-                   ->execute($params);
+                    ->execute($params);
             }
             echo json_encode(['ok' => true]);
             break;
         }
 
         case 'delete_notification': {
-            $nid = (int)($body['id'] ?? 0);
+            $nid = (int) ($body['id'] ?? 0);
             if ($nid > 0) {
                 $db->prepare("DELETE FROM `notifications` WHERE `id` = ? AND `user_id` = ?")
-                   ->execute([$nid, $user_id]);
+                    ->execute([$nid, $user_id]);
             }
             echo json_encode(['ok' => true]);
             break;
@@ -862,22 +931,46 @@ try {
 
 
         case 'get_billing_info': {
-            $sub=get_active_subscription($user_id); $wallet=get_wallet($user_id);
-            $limits=get_user_limits($user_id); $plans=get_all_plans(); $txns=get_wallet_transactions($user_id,10);
-            $dash_count=(int)$db->query("SELECT COUNT(*) FROM `dashboards` WHERE `owner_id`={$user_id}")->fetchColumn();
-            $ls=$db->prepare("SELECT le.`entity_id`,d.`name` FROM `locked_entities` le JOIN `dashboards` d ON d.`id`=le.`entity_id` WHERE le.`user_id`=? AND le.`entity_type`='dashboard'");
-            $ls->execute([$user_id]); $locked=$ls->fetchAll();
-            echo json_encode(['ok'=>true,'subscription'=>$sub,'wallet'=>['balance'=>(float)$wallet['balance']],'limits'=>$limits,'usage'=>['dashboards'=>$dash_count],'plans'=>$plans,'transactions'=>$txns,'locked_dashboards'=>$locked]);
+            try {
+                $info = get_billing_info_full($user_id);
+                $dash_count = (int) $db->query("SELECT COUNT(*) FROM `dashboards` WHERE `owner_id`={$user_id}")->fetchColumn();
+                $ls = $db->prepare("SELECT le.`entity_id`,d.`name` FROM `locked_entities` le JOIN `dashboards` d ON d.`id`=le.`entity_id` WHERE le.`user_id`=? AND le.`entity_type`='dashboard'");
+                $ls->execute([$user_id]);
+                $locked_dash = $ls->fetchAll();
+                $lp = $db->prepare("SELECT le.`entity_id`,p.`name`,p.`dashboard_id` FROM `locked_entities` le JOIN `pages` p ON p.`id`=le.`entity_id` WHERE le.`user_id`=? AND le.`entity_type`='page'");
+                $lp->execute([$user_id]);
+                $locked_pages = $lp->fetchAll();
+                echo json_encode(['ok' => true, 'info' => $info, 'usage' => ['dashboards' => $dash_count], 'locked_dashboards' => $locked_dash, 'locked_pages' => $locked_pages]);
+            } catch (Throwable $e) {
+                echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
+            }
+            break;
+        }
+
+        case 'get_billing_info_OLD': {
+            $sub = get_active_subscription($user_id);
+            $wallet = get_wallet($user_id);
+            $limits = get_user_limits($user_id);
+            $plans = get_all_plans();
+            $txns = get_wallet_transactions($user_id, 10);
+            $dash_count = (int) $db->query("SELECT COUNT(*) FROM `dashboards` WHERE `owner_id`={$user_id}")->fetchColumn();
+            $ls = $db->prepare("SELECT le.`entity_id`,d.`name` FROM `locked_entities` le JOIN `dashboards` d ON d.`id`=le.`entity_id` WHERE le.`user_id`=? AND le.`entity_type`='dashboard'");
+            $ls->execute([$user_id]);
+            $locked = $ls->fetchAll();
+            echo json_encode(['ok' => true, 'subscription' => $sub, 'wallet' => ['balance' => (float) $wallet['balance']], 'limits' => $limits, 'usage' => ['dashboards' => $dash_count], 'plans' => $plans, 'transactions' => $txns, 'locked_dashboards' => $locked]);
             break;
         }
         case 'topup_wallet': {
-            echo json_encode(topup_wallet($user_id,(float)($body['amount']??0)));
+            echo json_encode(topup_wallet($user_id, (float) ($body['amount'] ?? 0)));
             break;
         }
         case 'activate_plan': {
-            $slug=$body['slug']??'';
-            $result=activate_subscription($user_id,$slug);
-            if($result['ok']){$plan=get_plan_by_slug($slug);$result['needs_downgrade']=$plan?check_needs_downgrade($user_id,$plan):false;}
+            $slug = $body['slug'] ?? '';
+            $result = activate_subscription($user_id, $slug);
+            if ($result['ok']) {
+                $plan = get_plan_by_slug($slug);
+                $result['needs_downgrade'] = $plan ? check_needs_downgrade($user_id, $plan) : false;
+            }
             echo json_encode($result);
             break;
         }
@@ -889,8 +982,32 @@ try {
             echo json_encode($result);
             break;
         }
+        case 'cancel_pending_downgrade': {
+            try {
+                $db->prepare("UPDATE `subscriptions` SET `status`='cancelled',`cancelled_at`=NOW() WHERE `user_id`=? AND `status`='pending_downgrade'")->execute([$user_id]);
+                echo json_encode(['ok' => true]);
+            } catch (Throwable $e) {
+                echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
+            }
+            break;
+        }
+
+        case 'get_upgrade_price': {
+            $slug = $body['slug'] ?? '';
+            $plan = get_plan_by_slug($slug);
+            if (!$plan) {
+                echo json_encode(['ok' => false, 'error' => 'Тариф не найден']);
+                break;
+            }
+            $current = get_active_subscription($user_id);
+            $pricing = calculate_upgrade_price($current, $plan);
+            $wallet = get_wallet($user_id);
+            echo json_encode(['ok' => true, 'pricing' => $pricing, 'balance' => (float) $wallet['balance']]);
+            break;
+        }
+
         case 'get_plans': {
-            echo json_encode(['ok'=>true,'plans'=>get_all_plans()]);
+            echo json_encode(['ok' => true, 'plans' => get_all_plans()]);
             break;
         }
 
@@ -909,16 +1026,19 @@ try {
                 $all_s->execute([$user_id]);
                 $all_dash = $all_s->fetchAll();
 
+                $limits = get_user_limits($user_id);
+                // При безлимитном тарифе никогда не показывать модал выбора
+                $needs = ($limits['max_dashboards'] !== -1) && needs_downgrade_choice($user_id);
                 echo json_encode([
-                    'ok'           => true,
-                    'needs_choice' => needs_downgrade_choice($user_id),
-                    'locked'       => array_column($locked, 'id'),
+                    'ok' => true,
+                    'needs_choice' => $needs,
+                    'locked' => array_column($locked, 'id'),
                     'locked_names' => $locked,
-                    'all'          => $all_dash,
-                    'limits'       => get_user_limits($user_id),
+                    'all' => $all_dash,
+                    'limits' => $limits,
                 ]);
             } catch (Throwable $e) {
-                echo json_encode(['ok'=>true,'needs_choice'=>false,'locked'=>[],'all'=>[],'limits'=>get_user_limits($user_id)]);
+                echo json_encode(['ok' => true, 'needs_choice' => false, 'locked' => [], 'all' => [], 'limits' => get_user_limits($user_id)]);
             }
             break;
         }
@@ -928,7 +1048,8 @@ try {
     }
 
 } catch (Throwable $e) {
-    if ($db->inTransaction()) $db->rollBack();
+    if ($db->inTransaction())
+        $db->rollBack();
     http_response_code(500);
     echo json_encode(['ok' => false, 'error' => $e->getMessage()]);
 }

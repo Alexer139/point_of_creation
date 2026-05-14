@@ -21,7 +21,10 @@
   background: var(--bg2);
   color: var(--text2);
   cursor: pointer;
-  transition: background .15s, color .15s, border-color .15s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
 }
 
 .notif-bell__btn:hover {
@@ -41,19 +44,23 @@
   border-radius: 10px;
   background: #ef4444;
   color: #fff;
-  font-size: .68rem;
+  font-size: 0.68rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1;
   border: 2px solid var(--bg);
-  animation: badge-pop .2s ease;
+  animation: badge-pop 0.2s ease;
 }
 
 @keyframes badge-pop {
-  from { transform: scale(0); }
-  to   { transform: scale(1); }
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
 }
 
 /* ── Панель уведомлений ──────────────────────────────────────── */
@@ -76,12 +83,18 @@
 .notif-panel--open {
   display: flex;
   flex-direction: column;
-  animation: notif-in .18s ease;
+  animation: notif-in 0.18s ease;
 }
 
 @keyframes notif-in {
-  from { opacity: 0; transform: translateY(-8px) scale(.98); }
-  to   { opacity: 1; transform: translateY(0)   scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* Шапка панели */
@@ -95,7 +108,7 @@
 }
 
 .notif-panel__title {
-  font-size: .875rem;
+  font-size: 0.875rem;
   font-weight: 700;
   color: var(--text);
   display: flex;
@@ -104,14 +117,14 @@
 }
 
 .notif-panel__read-all {
-  font-size: .75rem;
+  font-size: 0.75rem;
   color: var(--amber);
   background: none;
   border: none;
   cursor: pointer;
   padding: 2px 6px;
   border-radius: 0.75rem;
-  transition: background .12s;
+  transition: background 0.12s;
 }
 
 .notif-panel__read-all:hover {
@@ -131,7 +144,7 @@
   padding: 32px 16px;
   text-align: center;
   color: var(--text3);
-  font-size: .875rem;
+  font-size: 0.875rem;
 }
 
 /* ── Одно уведомление ────────────────────────────────────────── */
@@ -142,7 +155,10 @@
   gap: 10px;
   padding: 12px 16px;
   border-bottom: 1px solid var(--border);
-  transition: background .12s, opacity .2s, transform .2s;
+  transition:
+    background 0.12s,
+    opacity 0.2s,
+    transform 0.2s;
   position: relative;
 }
 
@@ -160,7 +176,7 @@
 }
 
 .notif-item--unread::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 0;
@@ -172,9 +188,43 @@
 
 /* Иконка типа */
 .notif-item__icon {
-  font-size: 1.2rem;
   flex-shrink: 0;
-  margin-top: 1px;
+  margin-top: 2px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Цвет иконок по типу */
+.notif-icon--invited {
+  background: rgba(99, 102, 241, 0.12);
+  color: #818cf8;
+}
+.notif-icon--role {
+  background: rgba(212, 160, 87, 0.12);
+  color: var(--amber);
+}
+.notif-icon--removed {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--rose);
+}
+.notif-icon--upgrade {
+  background: rgba(52, 211, 153, 0.12);
+  color: #34d399;
+}
+.notif-icon--downgrade {
+  background: rgba(251, 146, 60, 0.12);
+  color: var(--orange);
+}
+.notif-icon--renewed {
+  background: rgba(99, 102, 241, 0.12);
+  color: #818cf8;
+}
+.notif-icon--expired {
+  background: rgba(212, 160, 87, 0.12);
+  color: var(--amber);
 }
 
 /* Тело */
@@ -184,13 +234,13 @@
 }
 
 .notif-item__text {
-  font-size: .84rem;
+  font-size: 0.84rem;
   color: var(--text);
   line-height: 1.5;
 }
 
 .notif-item__time {
-  font-size: .74rem;
+  font-size: 0.74rem;
   color: var(--text3);
   margin-top: 4px;
 }
@@ -205,12 +255,14 @@
   background: transparent;
   color: var(--text3);
   cursor: pointer;
-  font-size: .7rem;
+  font-size: 0.7rem;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity .12s, background .12s;
+  transition:
+    opacity 0.12s,
+    background 0.12s;
   margin-top: 1px;
 }
 
@@ -219,7 +271,7 @@
 }
 
 .notif-item__dismiss:hover {
-  background: rgba(239,68,68,.15);
+  background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
 }
 
@@ -234,13 +286,13 @@
   display: inline-block;
   padding: 1px 6px;
   border-radius: 20px;
-  font-size: .75rem;
+  font-size: 0.75rem;
   font-weight: 600;
   font-family: monospace;
 }
 
 .notif-role--editor {
-  background: rgba(99,102,241,.15);
+  background: rgba(99, 102, 241, 0.15);
   color: #6366f1;
 }
 

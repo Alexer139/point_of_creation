@@ -18,18 +18,18 @@ function get_db(): PDO
         return $pdo;
     }
 
-    $host = getenv('DB_HOST')     ?: getenv('MYSQLHOST')     ?: '127.0.0.1';
-    $port = getenv('DB_PORT')     ?: getenv('MYSQLPORT')     ?: '3306';
-    $name = getenv('DB_NAME')     ?: getenv('MYSQLDATABASE') ?: 'poc';
-    $user = getenv('DB_USER')     ?: getenv('MYSQLUSER')     ?: 'poc';
+    $host = getenv('DB_HOST') ?: getenv('MYSQLHOST') ?: '127.0.0.1';
+    $port = getenv('DB_PORT') ?: getenv('MYSQLPORT') ?: '3306';
+    $name = getenv('DB_NAME') ?: getenv('MYSQLDATABASE') ?: 'poc';
+    $user = getenv('DB_USER') ?: getenv('MYSQLUSER') ?: 'poc';
     $pass = getenv('DB_PASSWORD') ?: getenv('MYSQLPASSWORD') ?: '';
 
     $dsn = "mysql:host={$host};port={$port};dbname={$name};charset=utf8mb4";
 
     $pdo = new PDO($dsn, $user, $pass, [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES   => false,
+        PDO::ATTR_EMULATE_PREPARES => false,
     ]);
 
     // Синхронизировать timezone MySQL с PHP (оба в UTC)
@@ -252,7 +252,7 @@ function migrate(PDO $db): void
                     SELECT u.`id`,?,'active',NOW(),DATE_ADD(NOW(),INTERVAL 100 YEAR)
                     FROM `users` u
                     WHERE NOT EXISTS (SELECT 1 FROM `subscriptions` s WHERE s.`user_id`=u.`id`)")
-                   ->execute([$free['id']]);
+                    ->execute([$free['id']]);
             }
         },
 
@@ -263,6 +263,45 @@ function migrate(PDO $db): void
                     ADD COLUMN `downgrade_resolved` TINYINT(1) NOT NULL DEFAULT 1
                     COMMENT '0 = нужно показать выбор дашбордов, 1 = уже выбрал'");
             }
+        },
+
+
+        '006_pending_downgrade_and_page_created_at' => function (PDO $db) {
+            // Добавить pending_downgrade в ENUM статусов подписки
+            try {
+                $db->exec("ALTER TABLE `subscriptions`
+                    MODIFY `status` ENUM('active','expired','cancelled','pending_downgrade')
+                    NOT NULL DEFAULT 'active'");
+            } catch (Throwable $e) {
+            }
+
+            // Добавить created_at в pages если нет
+            $cols = $db->query("SHOW COLUMNS FROM `pages` LIKE 'created_at'")->fetchAll();
+            if (empty($cols)) {
+                $db->exec("ALTER TABLE `pages`
+                    ADD COLUMN `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP");
+            }
+        },
+
+
+        '007_payments_table' => function (PDO $db) {
+            $db->exec("
+                CREATE TABLE IF NOT EXISTS `payments` (
+                    `id`          INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+                    `user_id`     INT UNSIGNED  NOT NULL,
+                    `payment_id`  VARCHAR(64)   NOT NULL COMMENT 'ID платежа в ЮKassa',
+                    `amount`      DECIMAL(10,2) NOT NULL,
+                    `status`      ENUM('pending','succeeded','cancelled','refunded') NOT NULL DEFAULT 'pending',
+                    `description` VARCHAR(255)  NOT NULL DEFAULT '',
+                    `created_at`  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    `updated_at`  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                    PRIMARY KEY (`id`),
+                    UNIQUE KEY `uq_payment_id` (`payment_id`),
+                    KEY `idx_payments_user` (`user_id`),
+                    CONSTRAINT `fk_payments_user`
+                        FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            ");
         },
 
     ];

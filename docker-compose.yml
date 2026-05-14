@@ -14,8 +14,6 @@ services:
       MYSQL_PASSWORD:      password_poc
     volumes:
       - db_data:/var/lib/mysql
-      # Опционально: выполнить SQL при первом запуске
-      # - ./migrations:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost",
              "-u", "poc", "-password_poc"]
@@ -38,6 +36,17 @@ services:
       DB_NAME:     poc
       DB_USER:     poc
       DB_PASSWORD: password_poc
+
+      # ── ЮKassa ────────────────────────────────────────────
+      # Получить в личном кабинете: https://yookassa.ru/my/api-keys
+      # Для тестового режима ключ начинается с test_
+      YUKASSA_SHOP_ID:  "516191"          # например: 123456
+      YUKASSA_SECRET:   "test_*g3zWVT36FYvzxd3V0XAwgQkF0Z5naDu2c5BsZtr4vF9k"          # например: test_abc123...
+
+      # Базовый URL сайта (без слеша в конце)
+      # Нужен для формирования return_url после оплаты
+      APP_URL: "http://144.31.157.82"   # например: https://yourdomain.com
+
     volumes:
       - ./www:/var/www/html
     restart: unless-stopped

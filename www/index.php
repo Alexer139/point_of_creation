@@ -459,7 +459,8 @@ layout_start('Дашборд');
     document.addEventListener('DOMContentLoaded', async function () {
       try {
         const r = await api('get_downgrade_status', {});
-        if (r.ok && r.needs_choice && r.locked && r.locked.length > 0) {
+        if (r.ok && r.needs_choice && r.locked && r.locked.length > 0
+          && r.limits.max_dashboards !== -1) {
           _downgradeData = r;
           showDowngradeChoiceModal(r);
         }
@@ -471,9 +472,10 @@ layout_start('Дашборд');
       const total = data.all.length;
       const lockedIds = new Set(data.locked.map(Number));
 
+      const maxLabel = max === -1 ? '∞' : max;
       document.getElementById('downgrade-info-text').innerHTML =
-        `Ваш тариф <strong>${data.limits.plan_name}</strong> допускает <strong>${max}</strong> активных дашборда.<br>` +
-        `У вас ${total} дашбордов — выберите какие <strong>${max}</strong> оставить активными. Остальные будут заморожены (данные сохранятся).`;
+        `Ваш тариф <strong>${data.limits.plan_name}</strong> допускает <strong>${maxLabel}</strong> активных дашборда.<br>` +
+        `У вас ${total} дашбордов — выберите какие <strong>${maxLabel}</strong> оставить активными. Остальные будут заморожены (данные сохранятся).`;
 
       const list = document.getElementById('downgrade-choice-list');
       list.innerHTML = data.all.map(d => {
@@ -503,9 +505,11 @@ layout_start('Дашборд');
       const max = _downgradeData.limits.max_dashboards;
       const checked = document.querySelectorAll('#downgrade-choice-list .downgrade-check:checked').length;
       const counter = document.getElementById('downgrade-choice-counter');
-      counter.innerHTML = `Выбрано: <strong>${checked}</strong> / ${max}`;
-      counter.style.color = checked > max ? '#ef4444' : 'var(--text-2)';
-      document.getElementById('downgrade-confirm-btn').disabled = checked > max || checked < 1;
+      const maxLabel = max === -1 ? '∞' : max;
+      counter.innerHTML = `Выбрано: <strong>${checked}</strong> / ${maxLabel}`;
+      const overLimit = max !== -1 && checked > max;
+      counter.style.color = overLimit ? '#ef4444' : 'var(--text2)';
+      document.getElementById('downgrade-confirm-btn').disabled = overLimit || checked < 1;
     }
 
     async function confirmDowngradeChoice() {
