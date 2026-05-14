@@ -108,7 +108,7 @@ function create_payment(int $user_id, float $amount, string $description, string
       'ok' => true,
       'payment_id' => $result['id'],
       'confirmation_url' => $conf_url,
-      '_debug' => $result['confirmation'] ?? null, // временно для отладки
+      '_debug_full' => $result, // полный ответ для отладки
     ];
   }
 
