@@ -5,7 +5,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev \
     default-mysql-client \
     libssl-dev \
-    && docker-php-ext-install pdo pdo_mysql \
+    libcurl4-openssl-dev \
+    && docker-php-ext-install pdo pdo_mysql curl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN rm -f /etc/nginx/sites-enabled/default
