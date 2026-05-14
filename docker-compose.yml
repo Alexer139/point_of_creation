@@ -40,8 +40,8 @@ services:
       # ── ЮKassa ────────────────────────────────────────────
       # Получить в личном кабинете: https://yookassa.ru/my/api-keys
       # Для тестового режима ключ начинается с test_
-      YUKASSA_SHOP_ID:  ""          # например: 123456
-      YUKASSA_SECRET:   ""          # например: test_abc123...
+      YUKASSA_SHOP_ID:  "1357896"          # например: 123456
+      YUKASSA_SECRET:   "test_q-xcPAReFa-3n4mAZBfiU1Nbph1AtDEzPUMPN76UilE"          # например: test_abc123...
 
       # Базовый URL сайта (без слеша в конце)
       # Нужен для формирования return_url после оплаты
