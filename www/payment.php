@@ -36,7 +36,7 @@ function yukassa_request(string $method, string $endpoint, array $data = [], str
     CURLOPT_CUSTOMREQUEST => $method,
     CURLOPT_HTTPHEADER => $headers,
     CURLOPT_USERPWD => YUKASSA_SHOP_ID . ':' . YUKASSA_SECRET,
-    CURLOPT_TIMEOUT => 30,
+    CURLOPT_TIMEOUT => 15,
     CURLOPT_SSL_VERIFYPEER => true,
   ]);
 
@@ -88,7 +88,10 @@ if ($action === 'token' && $_SERVER['REQUEST_METHOD'] === 'POST') {
   $result = yukassa_request('POST', 'payments', [
     'amount' => ['value' => number_format($amount, 2, '.', ''), 'currency' => 'RUB'],
     'capture' => true,
-    'confirmation' => ['type' => 'embedded'],
+    'confirmation' => [
+      'type' => 'redirect',
+      'return_url' => APP_URL . '/payment.php?action=check_return',
+    ],
     'description' => "Пополнение счёта Point of Creation на {$amount} ₽",
     'metadata' => ['user_id' => $user_id, 'type' => 'topup'],
   ], 'poc-' . $user_id . '-' . time());
@@ -114,12 +117,11 @@ if ($action === 'token' && $_SERVER['REQUEST_METHOD'] === 'POST') {
   } catch (Throwable $e) {
   }
 
-  $token = $result['confirmation']['confirmation_token'] ?? '';
+  $confirm_url = $result['confirmation']['confirmation_url'] ?? '';
   echo json_encode([
     'ok' => true,
-    'token' => $token,
+    'confirmation_url' => $confirm_url,
     'payment_id' => $result['id'],
-    'return_url' => $return_url,
   ]);
   exit;
 }
@@ -170,6 +172,42 @@ if ($action === 'webhook') {
     http_response_code(500);
   }
   exit;
+}
+
+// ── action=check_return — пользователь вернулся со страницы ЮKassa ─
+if ($action === 'check_return') {
+  require_auth();
+  $payment_id = $_GET['payment_id'] ?? '';
+
+  if (!$payment_id) {
+    header('Location: /billing.php?msg=payment_error');
+    exit;
+  }
+
+  $result = yukassa_request('GET', 'payments/' . $payment_id);
+  $status = $result['status'] ?? 'unknown';
+  $user_id = (int) (current_user()['id'] ?? 0);
+
+  if ($status === 'succeeded') {
+    $db = get_db();
+    $stmt = $db->prepare("SELECT `status` FROM `payments` WHERE `payment_id` = ? AND `user_id` = ?");
+    $stmt->execute([$payment_id, $user_id]);
+    $row = $stmt->fetch();
+    if ($row && $row['status'] !== 'succeeded') {
+      $amount = (float) ($result['amount']['value'] ?? 0);
+      $db->prepare("UPDATE `payments` SET `status`='succeeded' WHERE `payment_id`=?")->execute([$payment_id]);
+      topup_wallet($user_id, $amount, "Пополнение через ЮKassa (#{$payment_id})");
+    }
+    header('Location: /billing.php?msg=payment_success');
+    exit;
+  } elseif ($status === 'canceled') {
+    header('Location: /billing.php?msg=payment_failed');
+    exit;
+  } else {
+    // Pending — ждём
+    header('Location: /billing.php?msg=payment_pending');
+    exit;
+  }
 }
 
 // ── action=check — проверить статус платежа (резервный путь) ──
