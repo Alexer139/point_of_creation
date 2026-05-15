@@ -90,7 +90,7 @@ if ($action === 'token' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     'capture' => true,
     'confirmation' => [
       'type' => 'redirect',
-      'return_url' => APP_URL . '/payment.php?action=check_return',
+      'return_url' => APP_URL . '/payment.php?action=check_return&payment_id=PAYMENT_ID',
     ],
     'description' => "Пополнение счёта Point of Creation на {$amount} ₽",
     'metadata' => ['user_id' => $user_id, 'type' => 'topup'],
@@ -118,6 +118,14 @@ if ($action === 'token' && $_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 
   $confirm_url = $result['confirmation']['confirmation_url'] ?? '';
+
+  // Сохраняем payment_id в сессии — ЮKassa не передаёт его в return_url
+  if (session_status() === PHP_SESSION_NONE)
+    session_start();
+  $_SESSION['last_payment_id'] = $result['id'];
+  $_SESSION['last_payment_user'] = $user_id;
+  $_SESSION['last_payment_amount'] = $amount;
+
   echo json_encode([
     'ok' => true,
     'confirmation_url' => $confirm_url,
@@ -177,35 +185,63 @@ if ($action === 'webhook') {
 // ── action=check_return — пользователь вернулся со страницы ЮKassa ─
 if ($action === 'check_return') {
   require_auth();
-  $payment_id = $_GET['payment_id'] ?? '';
+
+  $payment_id = trim($_GET['payment_id'] ?? '');
+  $user_id = (int) (current_user()['id'] ?? 0);
+
+  if (!$payment_id) {
+    // payment_id не пришёл — ищем последний pending платёж пользователя
+    try {
+      $db = get_db();
+      $stmt = $db->prepare("SELECT `payment_id` FROM `payments` WHERE `user_id`=? AND `status`='pending' ORDER BY `created_at` DESC LIMIT 1");
+      $stmt->execute([$user_id]);
+      $row = $stmt->fetch();
+      $payment_id = $row['payment_id'] ?? '';
+    } catch (Throwable $e) {
+    }
+  }
 
   if (!$payment_id) {
     header('Location: /billing.php?msg=payment_error');
     exit;
   }
 
+  // Проверить статус через API ЮKassa
   $result = yukassa_request('GET', 'payments/' . $payment_id);
   $status = $result['status'] ?? 'unknown';
-  $user_id = (int) (current_user()['id'] ?? 0);
 
   if ($status === 'succeeded') {
     $db = get_db();
-    $stmt = $db->prepare("SELECT `status` FROM `payments` WHERE `payment_id` = ? AND `user_id` = ?");
-    $stmt->execute([$payment_id, $user_id]);
+    $stmt = $db->prepare("SELECT `status` FROM `payments` WHERE `payment_id` = ?");
+    $stmt->execute([$payment_id]);
     $row = $stmt->fetch();
+
     if ($row && $row['status'] !== 'succeeded') {
-      $amount = (float) ($result['amount']['value'] ?? 0);
+      $amount = (float) ($result['amount']['value'] ?? $_SESSION['last_payment_amount'] ?? 0);
       $db->prepare("UPDATE `payments` SET `status`='succeeded' WHERE `payment_id`=?")->execute([$payment_id]);
       topup_wallet($user_id, $amount, "Пополнение через ЮKassa (#{$payment_id})");
+    } elseif (!$row) {
+      // Платёж не найден в БД (например вебхук уже обработал) — всё ок
     }
+
+    // Очистить сессию
+    unset($_SESSION['last_payment_id'], $_SESSION['last_payment_user'], $_SESSION['last_payment_amount']);
+
     header('Location: /billing.php?msg=payment_success');
     exit;
+
   } elseif ($status === 'canceled') {
+    unset($_SESSION['last_payment_id'], $_SESSION['last_payment_user'], $_SESSION['last_payment_amount']);
     header('Location: /billing.php?msg=payment_failed');
     exit;
-  } else {
-    // Pending — ждём
+
+  } elseif ($status === 'pending' || $status === 'waiting_for_capture') {
+    // Платёж ещё обрабатывается — подождать и попробовать снова
     header('Location: /billing.php?msg=payment_pending');
+    exit;
+
+  } else {
+    header('Location: /billing.php?msg=payment_error');
     exit;
   }
 }

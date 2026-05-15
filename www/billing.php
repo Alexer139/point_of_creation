@@ -871,9 +871,28 @@ require __DIR__ . '/templates/navbar.php'; ?>
         return;
       }
 
-      // Редирект на страницу оплаты ЮKassa
+      // Открыть страницу оплаты ЮKassa в новой вкладке
       if (r.confirmation_url) {
-        window.location.href = r.confirmation_url;
+        window.open(r.confirmation_url, '_blank');
+        billingToast('Страница оплаты открыта в новой вкладке');
+        // Вернуть кнопку и начать проверку статуса
+        if (btn) { btn.disabled = false; btn.textContent = 'Оплатить'; }
+        // Каждые 5 сек проверять не прошла ли оплата
+        const pollInterval = setInterval(async () => {
+          try {
+            const res = await fetch('/payment.php?action=check&payment_id=' + r.payment_id).then(x => x.json());
+            if (res.status === 'succeeded') {
+              clearInterval(pollInterval);
+              billingToast('✓ Оплата прошла! Баланс пополнен.');
+              setTimeout(() => location.reload(), 1200);
+            } else if (res.status === 'canceled') {
+              clearInterval(pollInterval);
+              billingToast('Платёж отменён', 'err');
+            }
+          } catch (e) { }
+        }, 5000);
+        // Остановить через 30 мин
+        setTimeout(() => clearInterval(pollInterval), 1800000);
       } else {
         billingToast('Не удалось получить ссылку на оплату', 'err');
         if (btn) { btn.disabled = false; btn.textContent = 'Оплатить'; }
