@@ -966,7 +966,8 @@ try {
         }
         case 'activate_plan': {
             $slug = $body['slug'] ?? '';
-            $result = activate_subscription($user_id, $slug);
+            $force = !empty($body['force']);
+            $result = activate_subscription($user_id, $slug, $force);
             if ($result['ok']) {
                 $plan = get_plan_by_slug($slug);
                 $result['needs_downgrade'] = $plan ? check_needs_downgrade($user_id, $plan) : false;
