@@ -8,6 +8,11 @@ require_once __DIR__ . '/core/auth.php';
 require_once __DIR__ . '/core/access.php';
 require_once __DIR__ . '/core/icons.php';
 require_once __DIR__ . '/templates/layout.php';
+// Незалогиненных — на about страницу
+if (!is_logged_in()) {
+  header('Location: /about.php');
+  exit;
+}
 require_auth();
 
 $user = current_user();
