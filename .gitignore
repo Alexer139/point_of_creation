@@ -3,6 +3,8 @@
 .env
 .env.local
 config/secrets.php
+docker-compose.yml
+nginx.conf
 
 # --- Зависимости ---
 # Эти папки весят много, их скачивают командой composer install
